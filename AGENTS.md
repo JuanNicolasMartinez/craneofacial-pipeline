@@ -9,6 +9,7 @@ Antes de tocar cualquier archivo, lee en orden:
 2. `docs/architecture/DB.md` — modelo de datos completo
 3. `docs/pipeline/step1.md` — los 9 pasos del pipeline y sus dependencias
 4. `docs/ui/` — especificaciones de UI del módulo en el que vas a trabajar
+5. `docs/docker/` — especificaciones de de los contenedores
 
 ## Mapa de responsabilidades
 
