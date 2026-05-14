@@ -9,6 +9,12 @@ export function useCases() {
       const { data } = await apiClient.get("/cases");
       return data;
     },
+    refetchInterval: (query) => {
+      // Poll while any case is running, stop once all are settled
+      const cases = query.state.data;
+      if (cases?.some((c) => c.status === "running")) return 3000;
+      return false;
+    },
   });
 }
 

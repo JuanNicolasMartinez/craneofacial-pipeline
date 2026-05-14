@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Float, ForeignKey, func
+from sqlalchemy import String, Float, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
@@ -13,7 +13,7 @@ class LandmarkSet(Base):
     protocol: Mapped[str] = mapped_column(String(30), default="Rhine-Campbell-1980")
     operator: Mapped[str] = mapped_column(String(100))
     mean_inter_operator_dist_mm: Mapped[float | None] = mapped_column(Float)
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     case: Mapped["Case"] = relationship(back_populates="landmark_sets")
     landmarks: Mapped[list["Landmark"]] = relationship(

@@ -14,14 +14,13 @@ const STEP_LABELS: Record<number, string> = {
 
 export function StepProgress() {
   const stepProgress = useJobStore((s) => s.stepProgress);
-  const activeStep = useJobStore((s) => s.activeStep);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
       {Array.from({ length: 9 }, (_, i) => i + 1).map((step) => {
         const prog = stepProgress[step];
         const isDone = prog?.status === "done";
-        const isRunning = prog?.status === "running" || step === activeStep;
+        const isRunning = prog?.status === "running";
         const isError = prog?.status === "error";
 
         let color = "var(--text-muted)";

@@ -3,7 +3,7 @@ import { useCreateCase } from "../../api/hooks/useCases";
 
 interface CreateCaseModalProps {
   onClose: () => void;
-  onCreated: (id: string) => void;
+  onCreated: (id: string, ref: string) => void;
 }
 
 export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
@@ -19,8 +19,7 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
       notes: notes || undefined,
       created_by: operator,
     });
-    onCreated(result.id);
-    onClose();
+    onCreated(result.id, result.case_ref);
   };
 
   return (
@@ -48,13 +47,13 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
         }}
       >
         <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>
-          New forensic case
+          Nuevo caso forense
         </h2>
 
         {[
-          { label: "Case reference", value: caseRef, setter: setCaseRef, placeholder: "CASO-2025-084", required: true },
-          { label: "Operator", value: operator, setter: setOperator, placeholder: "Analyst name", required: true },
-          { label: "Notes", value: notes, setter: setNotes, placeholder: "Optional observations", required: false },
+          { label: "Referencia del caso", value: caseRef, setter: setCaseRef, placeholder: "CASO-2025-084", required: true },
+          { label: "Operador", value: operator, setter: setOperator, placeholder: "Nombre del analista", required: true },
+          { label: "Notas", value: notes, setter: setNotes, placeholder: "Observaciones opcionales", required: false },
         ].map(({ label, value, setter, placeholder, required }) => (
           <label key={label} style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
             <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{label}</span>
@@ -78,10 +77,10 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
 
         <div style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
           <button type="button" className="btn-secondary" onClick={onClose}>
-            Cancel
+            Cancelar
           </button>
           <button type="submit" className="btn-primary" disabled={createCase.isPending}>
-            {createCase.isPending ? "Creating…" : "Create case"}
+            {createCase.isPending ? "Creando…" : "Crear caso"}
           </button>
         </div>
       </form>

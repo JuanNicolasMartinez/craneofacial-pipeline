@@ -41,11 +41,39 @@ export interface LandmarkSetCreate {
   landmarks: LandmarkIn[];
 }
 
+export interface MeshRead {
+  id: string;
+  case_id: string;
+  storage_url: string;
+  format: string;
+  file_size_bytes: number | null;
+  vertex_count: number | null;
+  created_at: string;
+}
+
 export interface BiologicalProfileCreate {
   sex: "M" | "F";
   ancestry: "global" | "latinoamerican" | "turkish" | "korean" | "caucasian";
   age_range: "18-35" | "35-50" | "50+" | "unknown";
   confidence: number;
+}
+
+export interface BiologicalProfileRead {
+  id: string;
+  case_id: string;
+  sex: "M" | "F";
+  ancestry: string;
+  age_range: string;
+  confidence: number;
+  created_at: string;
+}
+
+export interface LandmarkSetRead {
+  id: string;
+  case_id: string;
+  operator: string;
+  landmark_count: number;
+  created_at: string;
 }
 
 export interface PipelineRunRequest {

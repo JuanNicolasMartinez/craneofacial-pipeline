@@ -65,6 +65,20 @@ async def _run_step_async(
             step.completed_at = datetime.now(timezone.utc)
             await db.commit()
 
+        # On final step, mark job and case as completed
+        if next_task is None:
+            job_result = await db.execute(select(PipelineJob).where(PipelineJob.id == job_uuid))
+            job = job_result.scalar_one_or_none()
+            if job:
+                job.status = "completed"
+                job.completed_at = datetime.now(timezone.utc)
+                from app.models.case import Case
+                case_result = await db.execute(select(Case).where(Case.id == job.case_id))
+                case = case_result.scalar_one_or_none()
+                if case:
+                    case.status = "completed"
+                await db.commit()
+
     await publish_job_progress(
         settings.REDIS_URL,
         job_id,

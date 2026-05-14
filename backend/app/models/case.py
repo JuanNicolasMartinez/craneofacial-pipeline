@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, func
+from sqlalchemy import String, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
@@ -13,9 +13,9 @@ class Case(Base):
     status: Mapped[str] = mapped_column(String(20), default="created")
     notes: Mapped[str | None] = mapped_column(Text)
     created_by: Mapped[str] = mapped_column(String(100))
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     meshes: Mapped[list["Mesh"]] = relationship(back_populates="case", lazy="selectin")

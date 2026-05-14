@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, BigInteger, Integer, Float, ForeignKey, func
+from sqlalchemy import String, BigInteger, Integer, Float, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
@@ -15,7 +15,7 @@ class Mesh(Base):
     status: Mapped[str] = mapped_column(String(20), default="uploaded")
     vertex_count: Mapped[int | None] = mapped_column(Integer)
     file_size_bytes: Mapped[int] = mapped_column(BigInteger)
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     case: Mapped["Case"] = relationship(back_populates="meshes")
 
@@ -32,7 +32,7 @@ class BiologicalProfile(Base):
     age_range: Mapped[str] = mapped_column(String(10))
     confidence: Mapped[float] = mapped_column(Float)
     fstt_table: Mapped[str] = mapped_column(String(50))
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     case: Mapped["Case"] = relationship(back_populates="biological_profile")
 
