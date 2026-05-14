@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark mode (default) ─────────────────────────────── */
+:root,
+:root[data-theme="dark"] {
+  --bg-page:       #0B0D0F;
+  --bg-main:       #050607;
+  --bg-surface:    #111315;
+  --bg-card:       #17191C;
+  --bg-card-soft:  #1D2023;
+  --bg-elevated:   #24272B;
+
+  --text-primary:   #F2F4F4;
+  --text-secondary: #B6BABC;
+  --text-muted:     #7E8588;
+
+  --accent-blue:   #B7D6DF;
+  --accent-green:  #AFCB73;
+  --accent-lime:   #C9DD87;
+  --accent-red:    #EF594E;
+  --accent-orange: #BC7147;
+  --accent-purple: #9581C4;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.10);
+}
+
+/* ── Light mode ──────────────────────────────────────── */
+:root[data-theme="light"] {
+  --bg-page:       #F5F6F7;
+  --bg-main:       #FFFFFF;
+  --bg-surface:    #F2F3F5;
+  --bg-card:       #E8EAED;
+  --bg-card-soft:  #E1E4E8;
+  --bg-elevated:   #D8DBE0;
+
+  --text-primary:   #111315;
+  --text-secondary: #43484E;
+  --text-muted:     #6D7278;
+
+  --accent-blue:   #0E61BA;
+  --accent-green:  #4C7E36;
+  --accent-lime:   #799F1D;
+  --accent-red:    #B84238;
+  --accent-orange: #C46A2F;
+  --accent-purple: #6B4FA5;
+
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.10);
+}
+
+/* ── Purple mode ─────────────────────────────────────── */
+:root[data-theme="purple"] {
+  --bg-page:       #1A1B27;
+  --bg-main:       #10111A;
+  --bg-surface:    #181828;
+  --bg-card:       #201F34;
+  --bg-card-soft:  #27273C;
+  --bg-elevated:   #312F46;
+
+  --text-primary:   #F1EEF7;
+  --text-secondary: #B8B2CC;
+  --text-muted:     #817D99;
+
+  --accent-blue:   #9DBFE8;
+  --accent-green:  #9FCB7A;
+  --accent-lime:   #B4D698;
+  --accent-red:    #D7726C;
+  --accent-orange: #CC8A55;
+  --accent-purple: #B689E9;
+
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-medium: rgba(255, 255, 255, 0.09);
+}
+
+/* ── Shared tokens ───────────────────────────────────── */
+:root {
+  --radius-xl:   36px;
+  --radius-lg:   28px;
+  --radius-md:   22px;
+  --radius-pill: 999px;
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+}
+
+/* ── Base reset ──────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Button utilities ────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-6);
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent-blue);
+  color: var(--bg-main);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-6);
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-card-soft);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-secondary:hover { transform: translateY(-1px); background-color: var(--bg-elevated); }
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-icon:hover { background-color: var(--bg-elevated); color: var(--text-primary); }
