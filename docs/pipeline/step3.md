@@ -1,0 +1,55 @@
+# Paso 3 — Selección de landmarks (manual)
+
+**Anterior:** `step2.md` | **Siguiente:** `step4.md`
+
+| | |
+|---|---|
+| Worker | — (acción del usuario en el browser) |
+| Herramienta | Three.js `Raycaster` |
+| Entrada | malla limpia en viewer 3D |
+| Salida | 21 landmarks en DB (`landmark_sets` + `landmarks`) |
+
+## Qué hace
+
+El operador forense coloca manualmente 21 puntos anatómicos sobre la malla siguiendo el protocolo Rhine & Campbell (1980).
+
+## Mecánica en el browser
+
+Por cada clic sobre la malla, Three.js registra:
+- `(x, y, z)` — coordenadas 3D del punto de intersección
+- `(nx, ny, nz)` — normal unitaria de la cara del triángulo intersectado
+
+La etiqueta del landmark activo viene de `frontend/src/features/landmarks/constants.ts`.
+
+## Los 21 landmarks del protocolo
+
+```
+Medianos (10):
+  supraglabella, glabella, nasion, rhinion, mid-philtrum,
+  upper-lip, lower-lip, chin-lip-fold, mental-eminence, pogonion
+
+Bilaterales (11, × lado izq/der = 22 mediciones):
+  frontal-eminence, supraorbital, suborbital, cheekbone,
+  lateral-orbit, zygomatic-arch, supraglenoid, gonion,
+  supra-M2, occlusal-line, depressor-anguli
+```
+
+Labels exactos: ver `frontend/src/features/landmarks/constants.ts`.
+
+## Persistencia
+
+```
+PATCH /cases/{id}/landmarks
+Body: [{ label, x, y, z, nx, ny, nz }, ...]   // 21 objetos
+```
+
+Validación backend: exactamente 21 landmarks, labels del protocolo.
+
+## Reproducibilidad
+
+Si se carga un segundo set del mismo caso, el sistema calcula y guarda la distancia euclidiana media entre sets en `landmark_sets.mean_inter_operator_dist_mm`.
+
+## No hace
+
+- No detecta landmarks automáticamente — es 100% manual
+- No modifica la malla
