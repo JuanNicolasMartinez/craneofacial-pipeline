@@ -21,10 +21,10 @@ Sirve los endpoints REST y el WebSocket. Corre las migraciones de Alembic antes 
 ## `worker` — Celery
 
 **Imagen:** `backend/Dockerfile` (mismo target, distinto comando)
-**Comando:** `celery -A app.workers.celery_app worker --loglevel=info -Q mesh_queue,compute_queue,export_queue`
+**Comando:** `watchmedo auto-restart --directory=/app/app --pattern=*.py --recursive -- celery -A app.workers.celery_app worker --loglevel=info -Q mesh_queue,compute_queue,export_queue`
 **Puerto:** ninguno (solo consume de Redis)
 
-Ejecuta los pasos 2, 5–9 del pipeline en background. Carga FLAME en startup (`~140 MB`, una vez).
+Ejecuta los pasos 2, 5–9 del pipeline en background. En local se auto-reinicia al cambiar archivos Python del backend para evitar correr código viejo durante calibración y debugging.
 
 **Depende de:** `redis`, `postgres`
 
@@ -132,6 +132,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: >
+      watchmedo auto-restart
+      --directory=/app/app
+      --pattern=*.py
+      --recursive
+      --
       celery -A app.workers.celery_app worker
       --loglevel=info
       -Q mesh_queue,compute_queue,export_queue
@@ -174,7 +179,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Deps del sistema requeridas por Open3D y PyMeshLab
+# Deps del sistema conservadas para librerías de procesamiento de mallas en modo headless
 RUN apt-get update && apt-get install -y \
     libgomp1 \
     libglib2.0-0 \
@@ -192,9 +197,9 @@ COPY . .
 # El .pkl va en backend/assets/flame/generic_model.pkl (gitignored)
 ```
 
-**Por qué `python:3.11-slim` y no `alpine`:** Open3D y PyMeshLab tienen binarios precompilados para glibc (Debian/Ubuntu). Alpine usa musl libc — los wheels de PyPI no son compatibles y requerirían compilar desde fuente (30+ min de build).
+**Por qué `python:3.11-slim` y no `alpine`:** el stack científico de geometría 3D usado por el worker tiene binarios precompilados para glibc (Debian/Ubuntu). Alpine usa musl libc — varios wheels de PyPI no son compatibles y requerirían compilar desde fuente.
 
-**Por qué las deps del sistema (`libgl1`, `libgomp1`):** Open3D necesita OpenGL para procesamiento de mallas aunque no haya pantalla. `libgomp1` es para paralelismo de NumPy/SciPy.
+**Por qué las deps del sistema (`libgl1`, `libgomp1`):** se mantienen para procesamiento de mallas en modo headless y para paralelismo de NumPy/SciPy.
 
 ---
 

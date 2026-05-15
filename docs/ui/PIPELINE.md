@@ -38,17 +38,20 @@ Perfil biológico
 ```
 Texto 13px `--text-secondary`. Labels 12px `--text-muted`. Divisores horizontales `--border-subtle`.
 
-**Parámetro k — variantes de grosor:**
+**Parámetro k — ajuste exploratorio FSTT:**
 
 Slider horizontal:
-- Label: "Variante de grosor (k)" 13px `--text-secondary`
+- Label: "Ajuste exploratorio FSTT (k)" 13px `--text-secondary`
 - Rango: -1.5 · -1.0 · -0.5 · 0.0 · +0.5 · +1.0 · +1.5 (step 0.5)
 - Valor actual: pill `--bg-elevated` 13px/500, centrado bajo el slider
 - Descripción del valor actual:
   - `0.0` → "Grosor medio (recomendado)"
-  - `> 0` → "Tejido más grueso (+Nσ)"
-  - `< 0` → "Tejido más delgado (−Nσ)"
+  - `> 0` → "Tejido más grueso (+N)"
+  - `< 0` → "Tejido más delgado (−N)"
 - Color del track: `--accent-blue`, thumb: `--text-primary`
+
+La UI no presenta `k` como desviación estándar real porque la tabla actual solo
+contiene medias FSTT por celda.
 
 **Botón ejecutar:**
 PrimaryButton full-width 48px: "Reconstruir cráneo →"

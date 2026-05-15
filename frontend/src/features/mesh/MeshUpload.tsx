@@ -32,7 +32,9 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
       }
       setFileName(file.name);
       const result = await upload.mutateAsync(file);
-      // In dev with mock R2, construct a local object URL for preview
+      // Backend persists the mesh in storage; the GET /cases/{id} re-fetch will
+      // populate activeMeshUrl with a backend URL. For instant preview we still
+      // show a local object URL until the next hydration cycle replaces it.
       const objectUrl = URL.createObjectURL(file);
       setActiveMesh(objectUrl, result.format as "ply" | "obj" | "stl");
       onUploaded();

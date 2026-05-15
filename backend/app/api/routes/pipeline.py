@@ -2,6 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status as http_status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.storage import get_storage
 from app.schemas.pipeline import (
     PipelineRunRequest,
     PipelineRunResponse,
@@ -9,6 +10,8 @@ from app.schemas.pipeline import (
     ResultRead,
 )
 from app.services import pipeline_service, case_service
+from app.models.pipeline_job import JobStep
+from sqlalchemy import select
 
 router = APIRouter(prefix="/cases", tags=["pipeline"])
 
@@ -58,11 +61,65 @@ async def get_result(case_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     if not reconstruction:
         raise HTTPException(status_code=404, detail="No completed result found")
 
-    # In production, generate presigned R2 URLs here.
+    step = (
+        await db.execute(
+            select(JobStep).where(
+                JobStep.job_id == reconstruction.job_id,
+                JobStep.step_number == 9,
+            )
+        )
+    ).scalar_one_or_none()
+    step_params = step.params if step and step.params else {}
+    diagnostics = step_params.get("diagnostics") or {}
+    diagnostics_summary = {
+        key: diagnostics.get(key)
+        for key in (
+            "candidate_name",
+            "blend_alpha",
+            "confidence_score",
+            "confidence_reasons",
+            "robust_rigid_residual_mean_mm",
+            "robust_rigid_residual_max_mm",
+            "deformed_to_aligned_bbox_ratio",
+            "top_rigid_residuals",
+            "residual_landmark_weights_by_label",
+        )
+        if key in diagnostics
+    }
+    scientific_basis = {
+        "model": diagnostics.get("forensic_model_version"),
+        "fstt_profile": diagnostics.get("fstt_profile"),
+        "fstt_depths_by_label": diagnostics.get("fstt_depths_by_label"),
+        "fstt_constraint_tolerances_by_label": diagnostics.get(
+            "fstt_constraint_tolerances_by_label"
+        ),
+        "landmark_region_confidence_by_label": diagnostics.get(
+            "landmark_region_confidence_by_label"
+        ),
+        "normals_source": diagnostics.get("normals_source"),
+        "tps_smoothing": diagnostics.get("tps_smoothing"),
+    }
+    scientific_basis = {
+        key: value for key, value in scientific_basis.items() if value is not None
+    }
+
+    storage = get_storage()
     return ResultRead(
         job_id=reconstruction.job_id,
-        mesh_url=f"/dev-assets/{reconstruction.r2_key_mesh}",
-        params_url=f"/dev-assets/{reconstruction.r2_key_params}",
+        mesh_url=await storage.get_url(reconstruction.r2_key_mesh),
+        mesh_url_alt=(
+            await storage.get_url(reconstruction.r2_key_mesh_alt)
+            if reconstruction.r2_key_mesh_alt
+            else None
+        ),
+        params_url=await storage.get_url(reconstruction.r2_key_params),
+        quality_status=step_params.get("quality_status")
+        or diagnostics.get("quality_status"),
+        warning_message=step_params.get("warning_message")
+        or diagnostics.get("warning_message"),
+        confidence_score=diagnostics.get("confidence_score"),
+        scientific_basis=scientific_basis or None,
+        diagnostics_summary=diagnostics_summary or None,
         p2p_error_mm=reconstruction.p2p_error_mm,
         hausdorff_mm=reconstruction.hausdorff_mm,
     )

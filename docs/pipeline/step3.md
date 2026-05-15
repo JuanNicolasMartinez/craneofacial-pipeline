@@ -21,17 +21,30 @@ Por cada clic sobre la malla, Three.js registra:
 
 La etiqueta del landmark activo viene de `frontend/src/features/landmarks/constants.ts`.
 
-## Los 21 landmarks del protocolo
+## Los 21 landmarks del protocolo usados por la app
 
 ```
-Medianos (10):
-  supraglabella, glabella, nasion, rhinion, mid-philtrum,
-  upper-lip, lower-lip, chin-lip-fold, mental-eminence, pogonion
-
-Bilaterales (11, × lado izq/der = 22 mediciones):
-  frontal-eminence, supraorbital, suborbital, cheekbone,
-  lateral-orbit, zygomatic-arch, supraglenoid, gonion,
-  supra-M2, occlusal-line, depressor-anguli
+supraglabella
+glabella
+nasion
+end_of_nasal_bone
+mid_philtrum
+upper_lip_margin
+lower_lip_margin
+chin_lip_fold
+mental_eminence
+beneath_chin
+right_supraorbital
+right_suborbital
+right_lateral_orbit
+right_zygomatic_arch
+right_zygomatic
+right_masseter_muscle
+right_gonion
+right_supra_M2
+right_occlusal_line
+right_inferior_malar
+temporal_fossa
 ```
 
 Labels exactos: ver `frontend/src/features/landmarks/constants.ts`.

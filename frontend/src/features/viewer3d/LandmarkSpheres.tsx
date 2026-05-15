@@ -5,11 +5,14 @@ import { useJobStore } from "../../store/jobStore";
 import { RHINE_CAMPBELL_LANDMARKS } from "../landmarks/constants";
 
 interface LandmarkSpheresProps {
-  activeLandmarkIndex: number;
+  activeLandmarkIndex?: number;
 }
 
-export function LandmarkSpheres({ activeLandmarkIndex }: LandmarkSpheresProps) {
+export function LandmarkSpheres({
+  activeLandmarkIndex,
+}: LandmarkSpheresProps) {
   const landmarks = useJobStore((s) => s.landmarksInProgress);
+  const sizeFactor = useJobStore((s) => s.landmarkSize);
   const activeRef = useRef<THREE.Mesh>(null);
 
   useFrame(({ clock }) => {
@@ -19,12 +22,16 @@ export function LandmarkSpheres({ activeLandmarkIndex }: LandmarkSpheresProps) {
     }
   });
 
-  const activeLabel = RHINE_CAMPBELL_LANDMARKS[activeLandmarkIndex]?.label;
+  const activeLabel =
+    activeLandmarkIndex !== undefined && activeLandmarkIndex >= 0
+      ? RHINE_CAMPBELL_LANDMARKS[activeLandmarkIndex]?.label
+      : null;
 
   return (
-    <>
+    <group>
       {landmarks.map((lm) => {
         const isActive = lm.label === activeLabel;
+        const radius = (isActive ? 3 : 2.5) * sizeFactor;
         return (
           <mesh
             key={lm.label}
@@ -32,7 +39,7 @@ export function LandmarkSpheres({ activeLandmarkIndex }: LandmarkSpheresProps) {
             position={[lm.x, lm.y, lm.z]}
             renderOrder={999}
           >
-            <sphereGeometry args={[isActive ? 3 : 2.5, 16, 16]} />
+            <sphereGeometry args={[radius, 16, 16]} />
             <meshBasicMaterial
               color={isActive ? "#B7D6DF" : "#C9DD87"}
               depthTest={false}
@@ -40,6 +47,6 @@ export function LandmarkSpheres({ activeLandmarkIndex }: LandmarkSpheresProps) {
           </mesh>
         );
       })}
-    </>
+    </group>
   );
 }

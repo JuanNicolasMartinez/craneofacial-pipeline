@@ -6,6 +6,8 @@ const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:8000";
 
 export function useJobSocket(jobId: string | null) {
   const applyProgressMessage = useJobStore((s) => s.applyProgressMessage);
+  const setActiveJobId = useJobStore((s) => s.setActiveJobId);
+  const setActiveStep = useJobStore((s) => s.setActiveStep);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -18,6 +20,11 @@ export function useJobSocket(jobId: string | null) {
       try {
         const msg: JobProgressMessage = JSON.parse(event.data);
         applyProgressMessage(msg);
+        if (msg.status === "error") {
+          setActiveJobId(null);
+          setActiveStep("pipeline");
+          ws.close();
+        }
       } catch {
         // ignore malformed messages
       }
@@ -27,7 +34,7 @@ export function useJobSocket(jobId: string | null) {
       ws.close();
       wsRef.current = null;
     };
-  }, [jobId, applyProgressMessage]);
+  }, [jobId, applyProgressMessage, setActiveJobId, setActiveStep]);
 
   return wsRef;
 }

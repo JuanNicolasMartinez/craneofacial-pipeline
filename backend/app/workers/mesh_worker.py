@@ -1,8 +1,8 @@
 """
-Step 2: Mesh preprocessing (PyMeshLab).
-Receives the skull mesh from R2, cleans it, and passes job to align_worker.
+Step 2: conservative mesh preprocessing with trimesh.
+Receives the skull mesh from storage, canonicalizes it as PLY without changing
+coordinates, and passes the job to align_worker.
 """
-import asyncio
 from app.workers.celery_app import celery_app
 
 

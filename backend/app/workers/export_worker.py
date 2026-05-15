@@ -1,5 +1,5 @@
 """
-Step 9: Export result mesh to R2 and write Reconstruction record.
+Step 9: Export the single FLAME reconstruction to storage and write the record.
 """
 from app.workers.celery_app import celery_app
 

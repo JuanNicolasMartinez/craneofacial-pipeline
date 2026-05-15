@@ -25,34 +25,23 @@ Panel: `--bg-surface`, `--radius-lg`, `--border-subtle`, padding `--space-6`.
 
 ## Viewer 3D en modo resultado
 
-El viewer muestra ambas mallas superpuestas. Ver `VIEWER3D.md` — sección "Superposición cráneo + cara".
+El viewer muestra la malla facial reconstruida final. No muestra landmarks ni
+sliders locales sobre la cara: esos controles quedaron limitados al paso de
+selección/revisión porque en resultado generaban una lectura visual confusa.
 
 Diferencia respecto al viewer vacío:
 - Toolbar muestra "Resultado · Vista 3D" en lugar de "Vista 3D · Modo exploración"
-- Slider de opacidad visible por defecto (valor inicial 0.7)
-- Dos toggles de visibilidad activos: cráneo y cara
+- La cámara se centra en la malla facial resultante
 - El modo landmarks está deshabilitado (no hay cursor crosshair)
+- La descarga usa el `.ply` publicado por backend, sin deformaciones de cliente
 
 ---
 
 ## Panel lateral — controles de visualización
 
-**Opacidad de la cara reconstruida:**
-```
-Opacidad cara
-[══════════●══] 70%
-```
-Slider `--accent-blue`, 100% ancho. Controla `material.opacity` de la malla facial en tiempo real.
-
-**Toggles:**
-
-```
-[Eye]  Cráneo          activo → --accent-blue
-[Eye]  Cara            activo → --accent-purple
-[Eye]  Landmarks       activo → --accent-lime  (muestra las 21 esferas)
-```
-
-IconButtons 36px con label 13px `--text-secondary` a la derecha.
+El panel muestra estado, advertencia si aplica y una tarjeta “Base científica
+usada” con modelo, perfil FSTT, confianza y landmarks usados. No hay edición
+local de piel en esta vista.
 
 ---
 
@@ -78,19 +67,9 @@ Si no hay métricas: sección oculta, sin placeholder vacío.
 
 ## Panel lateral — variantes
 
-Si el job se ejecutó con múltiples valores de k, aparece un selector:
-
-```
-Variante de grosor
-  ○ k = -1.0  (tejido delgado)
-  ● k =  0.0  (media)  ← seleccionada
-  ○ k = +1.0  (tejido grueso)
-```
-
-Radio buttons estilizados como pills 32px, `--bg-card-soft`, seleccionado `--bg-elevated` + borde `--accent-blue`.
-Al cambiar variante: el viewer carga la malla correspondiente (nueva URL firmada de R2).
-
-Sin comparación visual side-by-side en esta iteración — solo selector.
+No hay selector de variantes en Forense v1. La salida activa es `mean_fstt`.
+Solo se habilitarán variantes delgada/media/gruesa cuando el backend tenga
+desviaciones estándar o intervalos FSTT citados por fuente.
 
 ---
 
@@ -121,5 +100,8 @@ Spinner en el botón durante la generación de URL (< 1s esperado).
 |---|---|
 | Cargando URLs | Spinner `--accent-blue` 24px en panel + "Preparando resultado..." |
 | Resultado disponible | Layout completo con viewer + panel |
+| Resultado con baja confianza | Descarga normal + warning + `confidence_score` |
 | Sin resultado (job no completado) | Panel vacío con "El pipeline no ha completado. Ve a la pestaña Pipeline." + link |
-| Error al cargar | `AlertCircle --accent-red` + mensaje + "Reintentar" |
+| Error al cargar | `AlertCircle --accent-red` + mensaje + CTA para volver a Pipeline |
+
+Si el último job del caso terminó en `error`, `GET /cases/{id}/result` no debe servir una reconstrucción vieja de un job anterior completado. La vista de resultado debe mostrar que no hay un resultado vigente y redirigir al usuario a revisar Pipeline.

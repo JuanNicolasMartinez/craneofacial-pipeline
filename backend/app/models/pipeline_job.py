@@ -56,6 +56,7 @@ class Reconstruction(Base):
         ForeignKey("pipeline_jobs.id"), index=True
     )
     r2_key_mesh: Mapped[str] = mapped_column(String(500))
+    r2_key_mesh_alt: Mapped[str | None] = mapped_column(String(500), nullable=True)
     r2_key_params: Mapped[str] = mapped_column(String(500))
     p2p_error_mm: Mapped[float | None] = mapped_column(Float)
     hausdorff_mm: Mapped[float | None] = mapped_column(Float)

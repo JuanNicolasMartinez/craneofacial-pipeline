@@ -42,6 +42,20 @@ export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
       </div>
 
       <div style={{ display: "flex", gap: "var(--space-2)" }}>
+        {import.meta.env.DEV && (
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              const nextUrl = new URL(window.location.href);
+              nextUrl.searchParams.set("dev", "flame-mapping");
+              window.location.href = nextUrl.toString();
+            }}
+            style={{ height: 44, padding: "0 var(--space-4)", fontSize: 12 }}
+            title="Abrir herramienta local de calibración FLAME"
+          >
+            FLAME Map
+          </button>
+        )}
         {themes.map((t) => (
           <button
             key={t}

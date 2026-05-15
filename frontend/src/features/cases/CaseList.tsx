@@ -7,7 +7,7 @@ import { CreateCaseModal } from "./CreateCaseModal";
 
 export function CaseList() {
   const { data: cases, isLoading } = useCases();
-  const { activeCaseId, setActiveCase } = useJobStore();
+  const { activeCaseId, selectCase } = useJobStore();
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -39,7 +39,7 @@ export function CaseList() {
           key={c.id}
           case_={c}
           isActive={c.id === activeCaseId}
-          onClick={() => setActiveCase(c.id, c.case_ref, c.status)}
+          onClick={() => selectCase({ id: c.id, ref: c.case_ref, status: c.status })}
         />
       ))}
 
@@ -59,7 +59,7 @@ export function CaseList() {
         <CreateCaseModal
           onClose={() => setShowModal(false)}
           onCreated={(id, ref) => {
-            setActiveCase(id, ref, "created");
+            selectCase({ id, ref, status: "created" });
             setShowModal(false);
           }}
         />

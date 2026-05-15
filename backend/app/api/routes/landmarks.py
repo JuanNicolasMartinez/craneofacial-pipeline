@@ -27,3 +27,14 @@ async def save_landmarks(
     lm_set = await landmark_service.save_landmark_set(db, case_id, data)
     await case_service.update_case_status(db, case_id, "landmarks_ready")
     return lm_set
+
+
+@router.get("/{case_id}/landmarks", response_model=LandmarkSetRead | None)
+async def get_landmarks(
+    case_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    case = await case_service.get_case(db, case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+    return await landmark_service.get_latest_landmark_set(db, case_id)

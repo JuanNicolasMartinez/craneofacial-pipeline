@@ -20,6 +20,17 @@ class CaseRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # Hydration — populated by GET /cases/{id} for checkpoint resume
+    current_step: str = "mesh"
+    mesh_id: uuid.UUID | None = None
+    mesh_url: str | None = None
+    mesh_format: str | None = None
+    landmark_set_id: uuid.UUID | None = None
+    landmark_count: int = 0
+    has_biological_profile: bool = False
+    last_job_id: uuid.UUID | None = None
+    last_job_status: str | None = None
+
 
 class CaseList(BaseModel):
     model_config = {"from_attributes": True}
@@ -29,3 +40,5 @@ class CaseList(BaseModel):
     status: str
     created_by: str
     created_at: datetime
+    # Light-weight checkpoint for the WelcomeScreen card
+    current_step: str = "mesh"

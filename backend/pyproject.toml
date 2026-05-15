@@ -20,7 +20,9 @@ dependencies = [
     "trimesh>=4.4",
     "numpy>=1.26",
     "scipy>=1.13",
+    "watchdog>=6.0",
     "python-multipart>=0.0.9",
+    "aiofiles>=23",
 ]
 
 [project.optional-dependencies]

@@ -67,10 +67,20 @@ async def update_job_status(
 async def get_case_result(
     db: AsyncSession, case_id: uuid.UUID
 ) -> Reconstruction | None:
+    latest_job = (
+        await db.execute(
+            select(PipelineJob)
+            .where(PipelineJob.case_id == case_id)
+            .order_by(PipelineJob.started_at.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if latest_job is None or latest_job.status != "completed":
+        return None
+
     result = await db.execute(
         select(Reconstruction)
-        .join(PipelineJob, Reconstruction.job_id == PipelineJob.id)
-        .where(PipelineJob.case_id == case_id, PipelineJob.status == "completed")
+        .where(Reconstruction.job_id == latest_job.id)
         .order_by(Reconstruction.created_at.desc())
         .limit(1)
     )

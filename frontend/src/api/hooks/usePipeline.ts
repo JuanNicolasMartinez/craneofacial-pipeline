@@ -12,9 +12,10 @@ export function useRunPipeline(caseId: string) {
       );
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
-    },
+    // Don't invalidate here — the WebSocket streams progress in real-time.
+    // An immediate refetch races with setActiveJobId and resets activeJobId to null
+    // (job is still "pending" in DB when the 202 response arrives).
+    onSuccess: () => {},
   });
 }
 

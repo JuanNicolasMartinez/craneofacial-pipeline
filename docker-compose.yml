@@ -40,6 +40,7 @@ services:
     volumes:
       - ./backend:/app
       - ./backend/assets:/app/assets
+      - ./backend/storage:/app/storage
     env_file:
       - ./backend/.env.local
     depends_on:
@@ -53,6 +54,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: >
+      watchmedo auto-restart
+      --directory=/app/app
+      --pattern=*.py
+      --recursive
+      --
       celery -A app.workers.celery_app worker
       --loglevel=info
       -Q mesh_queue,compute_queue,export_queue
@@ -60,6 +66,7 @@ services:
     volumes:
       - ./backend:/app
       - ./backend/assets:/app/assets
+      - ./backend/storage:/app/storage
     env_file:
       - ./backend/.env.local
     depends_on:

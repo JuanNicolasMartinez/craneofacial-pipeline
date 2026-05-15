@@ -75,6 +75,7 @@ docker compose logs -f worker
 docker compose exec api bash
 
 # Reiniciar solo el worker (sin reconstruir)
+# Normalmente no hace falta en local: el worker se auto-recarga al cambiar .py
 docker compose restart worker
 
 # Parar todo y eliminar volúmenes (BORRA la DB local)
@@ -87,9 +88,10 @@ docker compose build api worker
 ## Recarga en caliente
 
 - **Backend:** `--reload` en uvicorn detecta cambios en `backend/app/` y recarga automáticamente
-- **Workers Celery:** NO tienen recarga automática. Después de cambiar un worker:
+- **Workers Celery:** en local corren bajo `watchmedo auto-restart`, así que los cambios en `backend/app/**/*.py` reinician el worker automáticamente. Si cambias dependencias Python o el `docker-compose.yml`, sí necesitas:
   ```bash
-  docker compose restart worker
+  docker compose build api worker
+  docker compose up -d api worker
   ```
 - **Frontend:** Vite HMR funciona con el volumen montado
 

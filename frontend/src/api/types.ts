@@ -8,6 +8,8 @@ export interface CaseCreate {
   created_by: string;
 }
 
+export type CaseStep = "mesh" | "landmarks" | "biological_profile" | "pipeline" | "result";
+
 export interface CaseRead {
   id: string;
   case_ref: string;
@@ -16,6 +18,16 @@ export interface CaseRead {
   created_by: string;
   created_at: string;
   updated_at: string;
+  // Hydration / checkpoint
+  current_step: CaseStep;
+  mesh_id: string | null;
+  mesh_url: string | null;
+  mesh_format: "ply" | "obj" | "stl" | null;
+  landmark_set_id: string | null;
+  landmark_count: number;
+  has_biological_profile: boolean;
+  last_job_id: string | null;
+  last_job_status: string | null;
 }
 
 export interface CaseList {
@@ -24,6 +36,7 @@ export interface CaseList {
   status: string;
   created_by: string;
   created_at: string;
+  current_step: CaseStep;
 }
 
 export interface LandmarkIn {
@@ -72,8 +85,10 @@ export interface LandmarkSetRead {
   id: string;
   case_id: string;
   operator: string;
-  landmark_count: number;
+  protocol: string;
+  mean_inter_operator_dist_mm: number | null;
   created_at: string;
+  landmarks: (LandmarkIn & { id: string; set_id: string })[];
 }
 
 export interface PipelineRunRequest {
@@ -110,9 +125,24 @@ export interface PipelineJobRead {
 export interface ResultRead {
   job_id: string;
   mesh_url: string;
+  mesh_url_alt: string | null;
   params_url: string;
+  quality_status?: "ok" | "degraded" | "fallback" | string | null;
+  warning_message?: string | null;
+  confidence_score?: number | null;
+  scientific_basis?: Record<string, unknown> | null;
+  diagnostics_summary?: Record<string, unknown> | null;
   p2p_error_mm: number | null;
   hausdorff_mm: number | null;
+}
+
+export interface FlameMappingRead {
+  flame_template: string;
+  landmark_order: string[];
+  rigid_landmark_labels: string[];
+  mapping: Record<string, number>;
+  template_vertex_count: number;
+  template_face_count: number;
 }
 
 export interface JobProgressMessage {
@@ -120,4 +150,8 @@ export interface JobProgressMessage {
   status: "running" | "done" | "error";
   duration_ms?: number;
   error?: string;
+  vertex_count?: number;
+  face_count?: number;
+  quality_status?: string | null;
+  warning_message?: string | null;
 }

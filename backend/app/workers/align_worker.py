@@ -1,5 +1,5 @@
 """
-Steps 5-7: FSTT vectors, FLAME loading, skull-to-face alignment (Open3D).
+Steps 5-7: FSTT vectors, FLAME loading, and similarity pre-alignment.
 """
 from app.workers.celery_app import celery_app
 

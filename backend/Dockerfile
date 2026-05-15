@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Deps del sistema requeridas por Open3D y PyMeshLab
+# Deps del sistema conservadas para librerías de procesamiento de mallas en modo headless
 RUN apt-get update && apt-get install -y \
     libgomp1 \
     libglib2.0-0 \

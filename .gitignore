@@ -6,6 +6,9 @@
 # FLAME model (requires manual registration at flame.is.tue.mpg.de)
 backend/assets/flame/
 
+# Local file storage (dev mode mesh/result uploads)
+backend/storage/
+
 # Python
 __pycache__/
 *.py[cod]

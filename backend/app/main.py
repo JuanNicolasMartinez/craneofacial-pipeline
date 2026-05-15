@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import cases, meshes, landmarks, pipeline
+from app.api.routes import cases, meshes, landmarks, pipeline, files, dev_flame
 from app.api import websockets
 
 app = FastAPI(
@@ -23,6 +23,10 @@ app.include_router(meshes.router)
 app.include_router(landmarks.router)
 app.include_router(pipeline.router)
 app.include_router(websockets.router)
+
+if settings.STORAGE_BACKEND == "local":
+    app.include_router(files.router)
+    app.include_router(dev_flame.router)
 
 
 @app.get("/health", tags=["meta"])

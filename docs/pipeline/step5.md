@@ -11,7 +11,10 @@
 
 ## Qué hace
 
-Convierte los 21 landmarks craneales en 21 puntos de control faciales usando datos de grosor de tejido blando (FSTT).
+Convierte los 21 landmarks craneales en 21 puntos de control faciales usando
+datos de grosor de tejido blando (FSTT). En Forense v1 esos puntos son
+observaciones estadísticas: guían la reconstrucción, pero no fuerzan a FLAME a
+pasar exactamente por cada coordenada si eso rompe la forma humana.
 
 ## Fórmula
 
@@ -20,8 +23,8 @@ p_facial_i = p_craneal_i + d_i * n_i
 
 p_craneal_i  → (x, y, z) del landmark i
 n_i          → (nx, ny, nz) normal unitaria en ese punto
-d_i          → FSTT_TABLE[tabla][sex][label]['mean'] + k * FSTT_TABLE[...]['std']
-k            → factor de variante (default 0.0, rango ±1.5)
+d_i          → media FSTT según sexo, región y edad
+k            → ajuste exploratorio pequeño en mm, default 0.0
 ```
 
 ## Fuente de datos
@@ -30,18 +33,21 @@ k            → factor de variante (default 0.0, rango ±1.5)
 
 Ver contexto completo de FSTT en: `docs/architecture/STACK.md` (sección FSTT).
 
-## Factor k (variantes)
+## Factor k
 
-| k | Significado |
-|---|---|
-| `0.0` | reconstrucción con grosor medio (default) |
-| `+1.0` | tejido más grueso (+1σ) |
-| `-1.0` | tejido más delgado (-1σ) |
+La tabla actual solo contiene medias por landmark; no contiene desviaciones
+estándar citadas por celda. Por eso `k` no se presenta como σ real ni genera
+variantes thin/mean/thick automáticamente. Se conserva como ajuste exploratorio
+del pipeline, mientras la salida principal es `mean_fstt`.
+
+Cuando existan desviaciones estándar o intervalos por fuente académica, se podrá
+habilitar una salida de variantes delgada/media/gruesa con confianza explícita.
 
 ## Salida
 
-Array de 21 `ControlPoint(x, y, z, label)` — pasa en memoria al paso 6.
-Se serializa en `job_steps.params` para trazabilidad, no tiene tabla propia en DB.
+Array de 21 `ControlPoint(x, y, z, label)` — pasa en memoria al paso 6. También
+se registran en diagnósticos: profundidad FSTT, normal usada, tolerancia
+algorítmica y peso regional por landmark.
 
 ## No hace
 

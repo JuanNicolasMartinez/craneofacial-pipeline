@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -6,6 +8,12 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
     REDIS_URL: str
+
+    # Storage: "local" stores under STORAGE_LOCAL_PATH and serves via /files/...
+    # "r2" uses boto3 against Cloudflare R2 with presigned URLs.
+    STORAGE_BACKEND: Literal["local", "r2"] = "local"
+    STORAGE_LOCAL_PATH: str = "/app/storage"
+    PUBLIC_BASE_URL: str = "http://localhost:8000"
 
     R2_ACCOUNT_ID: str = "dev_mock"
     R2_ACCESS_KEY_ID: str = "dev_mock"

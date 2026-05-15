@@ -11,7 +11,7 @@ Browser          → React + Three.js (Vite)
 HTTP / WS        → REST + WebSocket
 API              → FastAPI (Python 3.11+)
 Job queue        → Celery + Redis
-Pipeline compute → PyMeshLab · Open3D · SciPy · FLAME · trimesh
+Pipeline compute → PyMeshLab · NumPy/SVD · SciPy · FLAME · trimesh
 Database         → PostgreSQL (Supabase free tier)
 Object storage   → Cloudflare R2 (10 GB free, sin egress)
 Deploy frontend  → Vercel
@@ -68,17 +68,17 @@ export_queue  → export_worker (I/O liviano)
 ### PyMeshLab
 **Por qué:** API Python oficial de MeshLab. Reemplaza llamar al ejecutable MeshLab vía subprocess. Mismas operaciones, integrable en el worker sin UI.
 
-### Open3D 0.18+
-**Por qué:** registro de mallas, alineación rígida, manipulación de nubes de puntos. Licencia MIT. Integración nativa con NumPy.
+### NumPy linear algebra (SVD / Procrustes)
+**Por qué:** la alineación cráneo–cara se resuelve con un similarity transform analítico sobre 21 correspondencias anatómicas. Es más simple y estable que introducir un stack de registro 3D adicional para esta etapa.
 
 ### SciPy (RBFInterpolator)
 **Por qué:** implementación robusta de Thin Plate Splines. `kernel='thin_plate_spline'` en `RBFInterpolator` es exactamente la función φ(r) = r² log(r) necesaria.
 
 ### FLAME
-**Por qué:** único modelo paramétrico facial 3D open-source con topología consistente y landmarks predefinidos compatibles con Rhine & Campbell. Se usa solo como malla base neutra — no infiere del cráneo. Requiere registro en flame.is.tue.mpg.de (gratuito, académico). El `.pkl` (~140 MB) no se commitea al repo.
+**Por qué:** único modelo paramétrico facial 3D open-source con topología consistente y landmarks predefinidos compatibles con Rhine & Campbell. En Forense v1 se usa como prior anatómico conservador: mantiene forma humana mientras FSTT y landmarks actúan como restricciones suaves. No infiere identidad desde el cráneo. Requiere registro en flame.is.tue.mpg.de (gratuito, académico). El `.pkl` (~140 MB) no se commitea al repo.
 
 ### trimesh
-**Por qué:** exportación limpia a .ply/.obj con metadatos. Más ligero que Open3D para operaciones de solo exportación.
+**Por qué:** exportación limpia a `.ply`/`.obj` con metadatos y una API simple para la etapa final del pipeline.
 
 ---
 
@@ -133,7 +133,8 @@ El dominio es lineal y los endpoints son predecibles. GraphQL agregaría schema,
 ```
 backend/app/core/config.py      → settings via pydantic-settings (env vars)
 backend/app/core/fstt.py        → tabla FSTT estática, fuente académica citada
-backend/app/core/flame_loader.py → FLAME cargado en startup del worker
+backend/app/core/reconstruction.py → carga del template FLAME + warp Procrustes/TPS
+backend/app/core/flame_landmarks.py → mapping canónico de 21 landmarks FLAME
 docker-compose.yml              → api + worker + redis + postgres local
 frontend/.env.local             → VITE_API_URL, VITE_WS_URL
 ```

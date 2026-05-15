@@ -2,12 +2,14 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
+from app.core.storage import get_storage
 from app.schemas.mesh import MeshRead, BiologicalProfileCreate, BiologicalProfileRead
 from app.services import mesh_service, case_service
 
 router = APIRouter(prefix="/cases", tags=["meshes"])
 
 ALLOWED_FORMATS = {"ply", "obj", "stl"}
+_CONTENT_TYPES = {"ply": "model/ply", "obj": "model/obj", "stl": "model/stl"}
 
 
 @router.post("/{case_id}/mesh", response_model=MeshRead)
@@ -30,12 +32,12 @@ async def upload_mesh(
     content = await file.read()
     file_size = len(content)
 
-    # In production: upload to R2 and store the key.
-    # In dev (mock credentials): store a placeholder key.
-    r2_key = f"meshes/{case_id}/{file.filename}"
+    storage = get_storage()
+    storage_key = f"meshes/{case_id}/{file.filename}"
+    await storage.upload(storage_key, content, content_type=_CONTENT_TYPES[ext])
 
     mesh = await mesh_service.create_mesh_record(
-        db, case_id=case_id, r2_key=r2_key, fmt=ext, file_size_bytes=file_size
+        db, case_id=case_id, r2_key=storage_key, fmt=ext, file_size_bytes=file_size
     )
     return mesh
 

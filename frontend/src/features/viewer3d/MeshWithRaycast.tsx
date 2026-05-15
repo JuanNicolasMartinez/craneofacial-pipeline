@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 import { useLoader } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
 import { PLYLoader } from "three/examples/jsm/loaders/PLYLoader.js";
@@ -9,20 +9,45 @@ interface MeshWithRaycastProps {
   url: string;
   format: "ply" | "obj" | "stl";
   landmarkMode?: boolean;
+  rotation?: [number, number, number];
   onMeshClick?: (p: { x: number; y: number; z: number; nx: number; ny: number; nz: number }) => void;
+  onBoundsReady?: (bounds: { min: [number, number, number]; max: [number, number, number] }) => void;
 }
 
-export function MeshWithRaycast({ url, format, landmarkMode, onMeshClick }: MeshWithRaycastProps) {
-  if (format === "ply") return <PLYMesh url={url} landmarkMode={landmarkMode} onMeshClick={onMeshClick} />;
+export function MeshWithRaycast(props: MeshWithRaycastProps) {
+  const { url, format, rotation = [Math.PI, 0, 0] } = props;
+  if (format === "ply") return <PLYMesh {...props} rotation={rotation} />;
   return <OBJMesh url={url} />;
 }
 
-function PLYMesh({ url, landmarkMode, onMeshClick }: Omit<MeshWithRaycastProps, "format">) {
-  const geometry = useLoader(PLYLoader, url);
+function PLYMesh({
+  url,
+  landmarkMode,
+  rotation = [Math.PI, 0, 0],
+  onMeshClick,
+  onBoundsReady,
+}: Omit<MeshWithRaycastProps, "format">) {
+  const loadedGeometry = useLoader(PLYLoader, url);
+  const geometry = useMemo(() => loadedGeometry.clone(), [loadedGeometry]);
   const meshRef = useRef<THREE.Mesh>(null);
   const pointerDown = useRef<{ x: number; y: number } | null>(null);
 
   if (!geometry.attributes.normal) geometry.computeVertexNormals();
+
+  useEffect(() => {
+    geometry.computeVertexNormals();
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+
+    if (meshRef.current) {
+      meshRef.current.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(meshRef.current);
+      onBoundsReady?.({
+        min: [box.min.x, box.min.y, box.min.z],
+        max: [box.max.x, box.max.y, box.max.z],
+      });
+    }
+  }, [geometry, onBoundsReady]);
 
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
     pointerDown.current = { x: e.clientX, y: e.clientY };
@@ -58,7 +83,7 @@ function PLYMesh({ url, landmarkMode, onMeshClick }: Omit<MeshWithRaycastProps, 
       geometry={geometry}
       onPointerDown={handlePointerDown}
       onClick={handleClick}
-      rotation={[Math.PI, 0, 0]}
+      rotation={rotation}
     >
       <meshStandardMaterial
         color="#B6BABC"

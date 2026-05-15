@@ -54,6 +54,12 @@ class PipelineJobRead(BaseModel):
 class ResultRead(BaseModel):
     job_id: uuid.UUID
     mesh_url: str
+    mesh_url_alt: str | None = None
     params_url: str
+    quality_status: str | None = None
+    warning_message: str | None = None
+    confidence_score: float | None = None
+    scientific_basis: dict | None = None
+    diagnostics_summary: dict | None = None
     p2p_error_mm: float | None
     hausdorff_mm: float | None

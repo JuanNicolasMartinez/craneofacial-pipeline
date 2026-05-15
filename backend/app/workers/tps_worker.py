@@ -1,6 +1,5 @@
 """
-Step 8: Thin Plate Spline deformation (SciPy RBFInterpolator).
-Deforms the FLAME mesh so its control points match the skull landmarks + FSTT offsets.
+Step 8: Regularized Thin Plate Spline deformation (SciPy RBFInterpolator).
 """
 from app.workers.celery_app import celery_app
 
