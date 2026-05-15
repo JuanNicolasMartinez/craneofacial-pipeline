@@ -32,69 +32,69 @@ Esta guia responde tres preguntas operativas:
 ### Linea media
 
 `supraglabella`
-: Punto superior a la glabela, sobre la eminencia frontal media. Debe quedar en la linea media.
+: Punto superior a la glabela, sobre la eminencia frontal media. Debe quedar en la linea media. (Mas o menos: un poco arriba del entrecejo, en la mitad de la frente).
 
 `glabella`
-: Punto mas prominente entre los arcos superciliares, en la linea media frontal.
+: Punto mas prominente entre los arcos superciliares, en la linea media frontal. (Mas o menos: justo en el entrecejo).
 
 `nasion`
-: Interseccion de frontal y huesos nasales, en la raiz de la nariz.
+: Interseccion de frontal y huesos nasales, en la raiz de la nariz. (Mas o menos: donde empieza la nariz entre los ojos).
 
 `end_of_nasal_bone`
-: Extremo inferior del hueso nasal, antes de pasar al soporte cartilaginoso.
+: Extremo inferior del hueso nasal, antes de pasar al soporte cartilaginoso. (Mas o menos: la parte baja del hueso de la nariz, antes de la punta blanda).
 
 `mid_philtrum`
-: Proyeccion osea media bajo la apertura nasal, orientada al filtrum.
+: Proyeccion osea media bajo la apertura nasal, orientada al filtrum. (Mas o menos: debajo de la nariz, en la hendidura central que baja hacia el labio).
 
 `upper_lip_margin`
-: Referencia media superior de la region alveolar/labial.
+: Referencia media superior de la region alveolar/labial. (Mas o menos: en el centro del borde superior de la boca).
 
 `lower_lip_margin`
-: Referencia media inferior de la region alveolar/labial mandibular.
+: Referencia media inferior de la region alveolar/labial mandibular. (Mas o menos: en el centro del borde inferior de la boca).
 
 `chin_lip_fold`
-: Zona media del surco mentolabial.
+: Zona media del surco mentolabial. (Mas o menos: el pliegue entre el labio inferior y el menton).
 
 `mental_eminence`
-: Punto mas prominente del menton oseo en la linea media.
+: Punto mas prominente del menton oseo en la linea media. (Mas o menos: la punta del menton).
 
 `beneath_chin`
-: Punto bajo el menton, en la transicion inferior mandibular media.
+: Punto bajo el menton, en la transicion inferior mandibular media. (Mas o menos: justo por debajo del menton).
 
 ### Lado derecho
 
 `right_supraorbital`
-: Reborde orbitario superior derecho.
+: Reborde orbitario superior derecho. (Mas o menos: el borde oseo de arriba del ojo derecho).
 
 `right_suborbital`
-: Reborde orbitario inferior derecho.
+: Reborde orbitario inferior derecho. (Mas o menos: el borde oseo de abajo del ojo derecho).
 
 `right_lateral_orbit`
-: Margen lateral de la orbita derecha.
+: Margen lateral de la orbita derecha. (Mas o menos: el borde externo de la cuenca del ojo derecho).
 
 `right_zygomatic_arch`
-: Arco cigomatico derecho, en la zona lateral mas clara y reproducible.
+: Arco cigomatico derecho, en la zona lateral mas clara y reproducible. (Mas o menos: el hueso del pomulo hacia el costado de la cara).
 
 `right_zygomatic`
-: Eminencia del hueso cigomatico derecho.
+: Eminencia del hueso cigomatico derecho. (Mas o menos: la parte mas saliente del pomulo derecho).
 
 `right_masseter_muscle`
-: Cara lateral mandibular donde anatomica y funcionalmente se relaciona el masetero.
+: Cara lateral mandibular donde anatomica y funcionalmente se relaciona el masetero. (Mas o menos: la zona de la mandibula donde uno siente el musculo al apretar los dientes).
 
 `right_gonion`
-: Angulo mandibular derecho.
+: Angulo mandibular derecho. (Mas o menos: la esquina de la mandibula, debajo y atras de la mejilla).
 
 `right_supra_M2`
-: Zona suprayacente al segundo molar superior derecho.
+: Zona suprayacente al segundo molar superior derecho. (Mas o menos: arriba del segundo molar de arriba del lado derecho).
 
 `right_occlusal_line`
-: Referencia lateral de la linea oclusal derecha.
+: Referencia lateral de la linea oclusal derecha. (Mas o menos: a la altura de la linea donde cierran los dientes del lado derecho).
 
 `right_inferior_malar`
-: Region malar inferior derecha.
+: Region malar inferior derecha. (Mas o menos: la parte baja del pomulo derecho).
 
 `temporal_fossa`
-: Fosa temporal derecha.
+: Fosa temporal derecha. (Mas o menos: la sien del lado derecho).
 
 ## Consejos de colocacion por estabilidad
 
