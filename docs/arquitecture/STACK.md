@@ -82,6 +82,21 @@ export_queue  → export_worker (I/O liviano)
 
 ---
 
+## Autenticación
+
+Auth básica con registro y login propio. Sin inicio de sesión con redes sociales. Detalle completo en `docs/arquitecture/AUTH.md`.
+
+### passlib (bcrypt)
+**Por qué:** hashing estándar de contraseñas. bcrypt incorpora salt y un factor de coste ajustable. Nunca se almacena ni se loguea la contraseña en claro.
+
+### python-jose
+**Por qué:** firma y verificación de JWT (HS256). El token lleva el `id` del usuario y una expiración. No se usa la auth de Supabase — Postgres se consume solo como servidor SQL (ver `DB.md`).
+
+### Cookie HttpOnly como transporte de sesión
+**Por qué:** el JWT viaja en una cookie `HttpOnly` + `SameSite=Lax`, no en `localStorage`. JavaScript no puede leer la cookie, lo que la hace inmune al robo de token por XSS. El navegador la adjunta automáticamente; axios solo necesita `withCredentials: true`. El CORS del backend ya tiene `allow_credentials=True`.
+
+---
+
 ## Comunicación Frontend–Backend
 
 ### REST (HTTP)
@@ -89,6 +104,10 @@ Usado para todas las operaciones con estado bien definido: crear caso, subir mal
 
 Convención de endpoints:
 ```
+POST   /auth/register                  crear cuenta → cookie de sesión
+POST   /auth/login                     iniciar sesión → cookie de sesión
+POST   /auth/logout                    cerrar sesión (borra la cookie)
+GET    /auth/me                        usuario autenticado actual
 POST   /cases                          crear caso
 POST   /cases/{id}/mesh                subir cráneo
 PATCH  /cases/{id}/landmarks           guardar 21 landmarks
@@ -97,6 +116,8 @@ POST   /cases/{id}/pipeline/run        iniciar pipeline → 202 + job_id
 GET    /cases/{id}/result              URLs firmadas del resultado
 GET    /cases                          listar casos del usuario
 ```
+
+Todos los endpoints de `/cases` requieren sesión y solo operan sobre casos del usuario autenticado (aislamiento estricto; ver `AUTH.md`).
 
 ### WebSocket
 Usado exclusivamente para progreso del pipeline en tiempo real.

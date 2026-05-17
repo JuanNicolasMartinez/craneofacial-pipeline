@@ -7,6 +7,7 @@ Sistema de diseño: **`DESIGN_SYSTEM.md`** — leer primero antes de cualquier o
 | Archivo | Módulo | Feature path |
 |---|---|---|
 | `DESIGN_SYSTEM.md` | Tokens, paleta, tipografía, componentes base | global |
+| `AUTH.md` | Landing, login, registro, menú de usuario, perfil | `pages/`, `components/UserMenu` |
 | `CASES.md` | Lista y gestión de casos | `features/cases/` |
 | `VIEWER3D.md` | Visualizador 3D de mallas | `features/viewer3d/` |
 | `LANDMARKS.md` | Selección interactiva de landmarks | `features/landmarks/` |

@@ -83,7 +83,7 @@ class Case(Base):
     case_ref: Mapped[str] = mapped_column(String(100))
     status: Mapped[str] = mapped_column(String(20), default="created")
     notes: Mapped[str | None] = mapped_column(Text)
-    created_by: Mapped[str] = mapped_column(String(100))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), onupdate=func.now()
@@ -110,6 +110,7 @@ Regla: nunca usar `Base.metadata.create_all()` en producción. Solo Alembic.
 ## Diagrama de entidades
 
 ```
+User ──── Case                 (1:N, cada caso pertenece a un usuario)
 Case ──── Mesh                 (1:1 activo, 1:N histórico)
 Case ──── BiologicalProfile    (1:1)
 Case ──── LandmarkSet          (1:N, un set por operador)
@@ -123,6 +124,20 @@ PipelineJob ──── Reconstruction (1:N, una por variante k)
 
 ## Tablas
 
+### `users`
+Cuenta de usuario. Cada caso pertenece a un usuario (ver `docs/arquitecture/AUTH.md`).
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | UUID PK | generado en DB |
+| `email` | VARCHAR(255) | UNIQUE, indexado — identidad de login |
+| `full_name` | VARCHAR(100) | nombre mostrado del usuario |
+| `hashed_password` | VARCHAR(255) | hash bcrypt — nunca se expone por la API |
+| `is_active` | BOOLEAN | default true; un usuario inactivo no puede autenticarse |
+| `created_at` | TIMESTAMPTZ | default now() |
+
+---
+
 ### `cases`
 Entidad central. Representa un caso forense.
 
@@ -132,9 +147,11 @@ Entidad central. Representa un caso forense.
 | `case_ref` | VARCHAR(100) | referencia humana, ej. "CASO-2025-084" |
 | `status` | VARCHAR(20) | `created` `landmarks_ready` `running` `completed` `error` |
 | `notes` | TEXT | nullable |
-| `created_by` | VARCHAR(100) | identificador del operador |
+| `user_id` | UUID FK → users | dueño del caso; NOT NULL, indexado |
 | `created_at` | TIMESTAMPTZ | default now() |
 | `updated_at` | TIMESTAMPTZ | auto-update |
+
+> El antiguo campo `created_by` (VARCHAR libre) fue reemplazado por `user_id`. El nombre del operador se obtiene vía la relación `Case.user.full_name`.
 
 ---
 
@@ -255,6 +272,8 @@ Resultado final de un job. Puede haber varias por job (una por variante k).
 ## Índices recomendados
 
 ```sql
+CREATE UNIQUE INDEX ix_users_email ON users(email);
+CREATE INDEX ix_cases_user_id ON cases(user_id);
 CREATE INDEX idx_meshes_case_id ON meshes(case_id);
 CREATE INDEX idx_landmark_sets_case_id ON landmark_sets(case_id);
 CREATE INDEX idx_landmarks_set_id ON landmarks(set_id);

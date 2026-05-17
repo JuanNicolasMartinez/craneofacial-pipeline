@@ -29,8 +29,9 @@ Barra superior en pill (`--radius-pill`, `--bg-surface`). Contiene:
 - Item activo: fondo `--bg-card-soft`, texto `--text-primary`
 - Items inactivos: texto `--text-secondary`
 - Botón primario derecho: `+ Nuevo caso` — pill `--accent-blue`, texto `--bg-main`, 44px alto
-- Icon buttons circulares: notificaciones, ajustes (40px, semitransparente)
-- Avatar de usuario: 28–32px circular, borde 2px `--bg-card`
+- **Menú de usuario**: icon button circular (40px) que abre un dropdown con la
+  identidad del usuario, el selector de tema y las acciones de cuenta.
+  Especificación completa en `docs/ui/AUTH.md`.
 
 ---
 
@@ -41,7 +42,7 @@ Grid de `CaseCard` con `gap: --space-8`. Cada card:
 ```
 CaseCard  (--bg-surface, --radius-lg, --border-subtle, padding --space-6)
 ├── Header: case_ref (16px/500) + badge de status
-├── Metadata: fecha · operador (14px, --text-muted, separados por divisor 1px)
+├── Metadata: fecha · owner_name (14px, --text-muted, separados por divisor 1px)
 └── Footer: botón "Abrir" (secundario) + indicador de paso actual
 ```
 
@@ -74,7 +75,9 @@ Card: `--bg-surface`, `--radius-lg`, padding `--space-6`, max-width 480px.
 |---|---|---|
 | Referencia | text | requerido, máx 100 chars |
 | Notas | textarea 3 líneas | opcional |
-| Operador | text | requerido |
+
+> El caso se atribuye automáticamente al usuario autenticado — no hay campo
+> "Operador". El nombre del dueño se muestra en la `CaseCard` como `owner_name`.
 
 Inputs: `--bg-card`, borde `--border-subtle`, `--radius-md`, 40px alto.
 Focus: borde `--accent-blue`, sin outline nativo.
