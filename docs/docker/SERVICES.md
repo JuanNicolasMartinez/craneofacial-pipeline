@@ -45,7 +45,8 @@ En prod se puede escalar `compute_queue` con más réplicas si el pipeline tarda
 
 **Imagen:** `postgres:16-alpine`
 **Puerto:** 5432
-**Solo en local.** En prod usa Supabase (ver `docs/architecture/DB.md`).
+**Solo en local.** En producción la DB corre aparte — autoalojada o gestionada
+(ver `docs/arquitecture/DB.md` y `docs/arquitecture/DEPLOY.md`).
 
 Volumen `postgres_data` persiste los datos entre reinicios de Docker.
 
@@ -60,7 +61,8 @@ Dos roles simultáneos:
 1. **Broker de Celery:** las tasks se encolan aquí
 2. **Canal de WebSocket:** los workers publican progreso aquí, la API lo lee y hace push al browser
 
-En prod Railway provee Redis gestionado. La URL cambia pero el comportamiento es idéntico.
+En producción Redis corre aparte — como contenedor propio o servicio gestionado.
+La `REDIS_URL` cambia pero el comportamiento es idéntico.
 
 ---
 
@@ -68,7 +70,8 @@ En prod Railway provee Redis gestionado. La URL cambia pero el comportamiento es
 
 **Imagen:** `frontend/Dockerfile`
 **Puerto:** 5173
-**Solo en local** como contenedor. En prod Vercel sirve el build estático directamente.
+**Solo en local** como contenedor. En producción no hay contenedor de frontend:
+se publica el build estático (`dist/`) en un servidor web o CDN.
 
 El Dockerfile del frontend solo existe para poder levantar todo con `docker compose up` sin instalar Node localmente. El volumen montado (`./frontend:/app`) garantiza HMR.
 

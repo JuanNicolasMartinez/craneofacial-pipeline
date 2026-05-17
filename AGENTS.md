@@ -8,9 +8,10 @@ Antes de tocar cualquier archivo, lee en orden:
 1. `docs/arquitecture/STACK.md` — qué tecnologías existen y por qué
 2. `docs/arquitecture/DB.md` — modelo de datos completo
 3. `docs/arquitecture/AUTH.md` — autenticación y propiedad de casos
-4. `docs/pipeline/step1.md` — los 9 pasos del pipeline y sus dependencias
-5. `docs/ui/` — especificaciones de UI del módulo en el que vas a trabajar
-6. `docs/docker/` — especificaciones de de los contenedores
+4. `docs/arquitecture/DEPLOY.md` — requisitos de despliegue (agnóstico al proveedor)
+5. `docs/pipeline/step1.md` — los 9 pasos del pipeline y sus dependencias
+6. `docs/ui/` — especificaciones de UI del módulo en el que vas a trabajar
+7. `docs/docker/` — especificaciones de de los contenedores
 
 ## Mapa de responsabilidades
 
@@ -75,7 +76,7 @@ No escribas tipos de API a mano.
 
 - No instales librerías 3D alternativas a Three.js (babylon.js, potree, etc.) sin discutirlo
 - No reemplaces Celery por BackgroundTasks de FastAPI — los workers necesitan reintentos y colas separadas
-- No accedas a R2 (Cloudflare) desde el frontend directamente, excepto para descargar URLs firmadas generadas por el backend
+- No accedas al almacenamiento de objetos desde el frontend directamente, excepto para descargar URLs firmadas generadas por el backend
 - No añadas lógica de identificación biométrica — el sistema produce hipótesis visuales, no identidades
 - No modifiques `backend/app/core/fstt.py` con datos inventados — toda actualización de la tabla requiere fuente académica citada
 

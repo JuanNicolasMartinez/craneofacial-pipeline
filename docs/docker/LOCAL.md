@@ -45,8 +45,10 @@ R2_BUCKET_NAME=craneofacial-dev
 FLAME_MODEL_PATH=/app/assets/flame/generic_model.pkl
 ```
 
-Para R2 en local puedes usar el mock (las operaciones de storage fallarán silenciosamente)
-o levantar un bucket real de Cloudflare R2 con credenciales reales.
+Para el almacenamiento en local usa el backend `local` (`STORAGE_BACKEND=local`),
+que guarda los archivos en disco y los sirve vía `/files/...`. Si quieres probar
+contra un almacenamiento S3-compatible real, cambia a `STORAGE_BACKEND=r2` y
+provee credenciales válidas.
 
 ## Migraciones
 

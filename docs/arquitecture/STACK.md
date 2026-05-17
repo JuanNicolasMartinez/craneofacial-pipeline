@@ -12,13 +12,14 @@ HTTP / WS        → REST + WebSocket
 API              → FastAPI (Python 3.11+)
 Job queue        → Celery + Redis
 Pipeline compute → PyMeshLab · NumPy/SVD · SciPy · FLAME · trimesh
-Database         → PostgreSQL (Supabase free tier)
-Object storage   → Cloudflare R2 (10 GB free, sin egress)
-Deploy frontend  → Vercel
-Deploy backend   → Railway (o Render)
+Database         → PostgreSQL
+Object storage   → almacenamiento de objetos compatible con S3
 ```
 
-Todo el stack es gratuito para el volumen de uso del semillero.
+El stack no depende de ningún proveedor concreto. Cada pieza
+(API, worker, Redis, Postgres, almacenamiento, frontend estático) se puede
+desplegar en infraestructura propia o gestionada. Requisitos de despliegue
+en `docs/arquitecture/DEPLOY.md`.
 
 ---
 
@@ -90,7 +91,7 @@ Auth básica con registro y login propio. Sin inicio de sesión con redes social
 **Por qué:** hashing estándar de contraseñas. bcrypt incorpora salt y un factor de coste ajustable. Nunca se almacena ni se loguea la contraseña en claro.
 
 ### python-jose
-**Por qué:** firma y verificación de JWT (HS256). El token lleva el `id` del usuario y una expiración. No se usa la auth de Supabase — Postgres se consume solo como servidor SQL (ver `DB.md`).
+**Por qué:** firma y verificación de JWT (HS256). El token lleva el `id` del usuario y una expiración. La autenticación es propia de la aplicación — Postgres se consume solo como servidor SQL estándar (ver `DB.md`).
 
 ### Cookie HttpOnly como transporte de sesión
 **Por qué:** el JWT viaja en una cookie `HttpOnly` + `SameSite=Lax`, no en `localStorage`. JavaScript no puede leer la cookie, lo que la hace inmune al robo de token por XSS. El navegador la adjunta automáticamente; axios solo necesita `withCredentials: true`. El CORS del backend ya tiene `allow_credentials=True`.
@@ -135,17 +136,29 @@ El dominio es lineal y los endpoints son predecibles. GraphQL agregaría schema,
 
 ## Infraestructura
 
-### Cloudflare R2
-**Por qué:** 10 GB storage + 0 egress cost (a diferencia de S3). Archivos de malla (5–20 MB c/u) nunca pasan por el servidor FastAPI — se acceden via presigned URLs.
+La aplicación es agnóstica al proveedor. Cada componente se define por su
+contrato, no por dónde corre. La guía completa de despliegue —
+infraestructura propia o gestionada — está en `docs/arquitecture/DEPLOY.md`.
 
-### PostgreSQL en Supabase
-**Por qué:** free tier suficiente para el volumen del semillero. Ver `DB.md` para el esquema completo.
+### Almacenamiento de objetos (compatible con S3)
+**Por qué:** las mallas (5–20 MB c/u) no se guardan en la DB ni pasan por el
+servidor FastAPI — se acceden vía URLs firmadas. El backend usa la API S3
+(`boto3`), por lo que sirve cualquier almacenamiento compatible con S3, ya sea
+autoalojado o gestionado. En desarrollo se usa el backend `local`
+(`STORAGE_BACKEND=local`), que guarda en disco.
 
-### Vercel (frontend)
-**Por qué:** detección automática de Vite, deploy en cada push a main, CDN global, free tier sin límite de ancho de banda.
+### PostgreSQL
+**Por qué:** base de datos relacional. Se consume como servidor Postgres
+estándar vía SQLAlchemy async — sin extensiones ni servicios propietarios.
+Funciona igual autoalojado o gestionado. Ver `DB.md` para el esquema.
 
-### Railway (backend)
-**Por qué:** soporte nativo para Python, variables de entorno, conexión a Postgres externa, free tier suficiente para demos. Alternativa: Render (mismo perfil).
+### Redis
+**Por qué:** broker de Celery y canal pub/sub para el WebSocket. Cualquier
+Redis ≥ 7 sirve, autoalojado o gestionado.
+
+### Frontend estático
+**Por qué:** Vite produce un build estático (`dist/`) que sirve cualquier
+servidor web o CDN. No requiere runtime de Node en producción.
 
 ---
 

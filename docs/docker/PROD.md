@@ -1,111 +1,104 @@
 # Docker — producción
 
-En producción el stack se divide: Railway corre `api` y `worker`, Vercel sirve el frontend, Supabase provee Postgres, Railway Redis provee Redis.
+Cómo se construyen y configuran los artefactos de producción. Este documento
+es **agnóstico al proveedor**: describe las imágenes y el build estático, no
+dónde se hospedan.
 
-No se usa `docker-compose.prod.yml` para deploy — Railway construye desde el `Dockerfile` directamente.
+Los requisitos de infraestructura y el procedimiento de despliegue completo
+están en `docs/arquitecture/DEPLOY.md`.
 
 ---
 
-## Qué se containeriza en prod
+## Artefactos de producción
 
-| Servicio | Dónde corre | Cómo se despliega |
+| Artefacto | Construido desde | Ejecuta |
 |---|---|---|
-| `api` | Railway | Dockerfile detectado automáticamente |
-| `worker` | Railway (segundo servicio) | mismo Dockerfile, distinto start command |
-| `postgres` | Supabase | no containerizado |
-| `redis` | Railway Redis plugin | no containerizado |
-| `frontend` | Vercel | build estático, sin Docker |
+| Imagen `api` | `backend/Dockerfile` | `uvicorn app.main:app` |
+| Imagen `worker` | `backend/Dockerfile` (la misma) | `celery -A app.workers.celery_app worker` |
+| Build del frontend | `frontend/` (`pnpm build`) | nada — son archivos estáticos en `dist/` |
+
+`api` y `worker` comparten la **misma imagen**; solo cambia el comando de
+arranque. El frontend en producción no es un contenedor: es un directorio
+estático que sirve cualquier servidor web o CDN.
+
+Postgres y Redis no se construyen aquí — se proveen como infraestructura
+(contenedor estándar o servicio gestionado). Ver `DEPLOY.md`.
 
 ---
 
-## Railway — configuración
+## Imagen del backend
 
-### Servicio `api`
+Un solo `Dockerfile` (`backend/Dockerfile`) sirve para `api` y `worker`.
 
-En Railway → New Service → GitHub repo → seleccionar `/backend` como root.
-
-**Start command:**
+**Comando de arranque — `api`:**
 ```
 alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
+`alembic upgrade head` aplica las migraciones pendientes antes de arrancar.
+El puerto se toma de `$PORT` si el entorno lo inyecta; si no, fijar uno explícito.
 
-Railway inyecta `$PORT` automáticamente. No hardcodear 8000 en prod.
-
-**Variables de entorno en Railway:**
+**Comando de arranque — `worker`:**
 ```
-DATABASE_URL         postgresql+asyncpg://postgres.[ref]:[pwd]@pooler.supabase.com:6543/postgres
-REDIS_URL            redis://default:[pwd]@[host]:6379
-R2_ACCOUNT_ID        [desde Cloudflare dashboard]
-R2_ACCESS_KEY_ID     [desde Cloudflare dashboard]
-R2_SECRET_ACCESS_KEY [desde Cloudflare dashboard]
-R2_BUCKET_NAME       craneofacial-prod
-FLAME_MODEL_PATH     /app/assets/flame/generic_model.pkl
+celery -A app.workers.celery_app worker --loglevel=info \
+       -Q mesh_queue,compute_queue,export_queue
 ```
 
-**El modelo FLAME en prod:** no se puede montar como volumen en Railway.
-Opciones (en orden de preferencia):
-1. Descargarlo en el `Dockerfile` durante el build (si el modelo es público) — no aplica (requiere registro)
-2. Subirlo a R2 y descargarlo en el startup script antes de arrancar uvicorn
-3. Incluirlo en el repo con Git LFS (no recomendado, 140 MB en el repo)
+El `worker` no debe correr `alembic upgrade head` — de eso se encarga `api`.
 
-**Opción recomendada — startup script:**
-```bash
-# backend/scripts/start.sh
-#!/bin/sh
-if [ ! -f "$FLAME_MODEL_PATH" ]; then
-  echo "Descargando modelo FLAME..."
-  aws s3 cp s3://$R2_BUCKET_NAME/models/generic_model.pkl $FLAME_MODEL_PATH \
-    --endpoint-url https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com
-fi
-alembic upgrade head
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
+### Modelo FLAME en la imagen
 
-Start command en Railway: `sh backend/scripts/start.sh`
+El `.pkl` de FLAME (~140 MB) **no** se incluye en la imagen (`.dockerignore`
+excluye `assets/flame/`). En producción debe estar disponible en la ruta
+`FLAME_MODEL_PATH` antes de procesar el pipeline. Opciones:
 
-### Servicio `worker`
-
-Segundo servicio en Railway, mismo repo, mismo Dockerfile.
-
-**Start command:**
-```
-sh -c "python -c 'from app.core.flame_loader import preload_flame; preload_flame()' && \
-       celery -A app.workers.celery_app worker --loglevel=info -Q mesh_queue,compute_queue,export_queue"
-```
-
-Mismas variables de entorno que `api`.
-
-### Railway Redis
-
-En Railway → New → Database → Redis.
-Railway inyecta `REDIS_URL` automáticamente si el servicio Redis está en el mismo proyecto.
+1. **Montar un volumen** con el archivo (infraestructura propia).
+2. **Descargarlo en el arranque** desde el almacenamiento de objetos, antes de
+   lanzar el proceso:
+   ```sh
+   if [ ! -f "$FLAME_MODEL_PATH" ]; then
+     aws s3 cp "s3://$R2_BUCKET_NAME/models/generic_model.pkl" "$FLAME_MODEL_PATH" \
+       --endpoint-url "$R2_ENDPOINT_URL"
+   fi
+   ```
+3. Incluirlo en el repo con Git LFS — no recomendado (140 MB en el repo).
 
 ---
 
-## Vercel — configuración
+## Build del frontend
 
-En Vercel → New Project → GitHub repo → **Root Directory: `frontend`**.
-
-**Build settings:**
 ```
-Build command:   npm run build
-Output dir:      dist
-Install command: npm install
+Build command:   pnpm build      (= tsc -b && vite build)
+Output:          dist/
 ```
 
-**Variables de entorno en Vercel:**
-```
-VITE_API_URL   https://[tu-api].railway.app
-VITE_WS_URL    wss://[tu-api].railway.app
-```
+`dist/` contiene HTML, JS y CSS estáticos. Se publica en cualquier servidor web,
+CDN o servicio de hosting estático. No requiere runtime de Node en producción.
 
-Vercel detecta Vite automáticamente. No necesita `vercel.json` para este setup.
+Las variables `VITE_*` se resuelven **en build time** — deben estar definidas
+antes de ejecutar `pnpm build`, no en runtime.
+
+---
+
+## Variables de entorno
+
+La lista completa de variables, su significado y los valores recomendados para
+producción están en `docs/arquitecture/DEPLOY.md`. Resumen:
+
+- **Backend (`api` y `worker`):** `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET_KEY`,
+  configuración de cookie (`COOKIE_SECURE`, `COOKIE_SAMESITE`), `CORS_ORIGINS`,
+  configuración de almacenamiento (`STORAGE_BACKEND` y credenciales S3),
+  `FLAME_MODEL_PATH`.
+- **Frontend (build time):** `VITE_API_URL`, `VITE_WS_URL`.
+
+`JWT_SECRET_KEY` es obligatoria — sin ella el contenedor no arranca. El `worker`
+también la necesita: carga `app.core.config`, que la exige.
 
 ---
 
 ## `docker-compose.prod.yml`
 
-Solo útil para smoke testing de la imagen de prod en local antes de hacer deploy.
+Útil para *smoke testing* de las imágenes de producción en local antes de
+desplegar. No es un archivo de despliegue.
 
 ```yaml
 # Uso: docker compose -f docker-compose.prod.yml up
@@ -120,11 +113,17 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
+      - STORAGE_BACKEND=${STORAGE_BACKEND}
       - R2_ACCOUNT_ID=${R2_ACCOUNT_ID}
       - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
       - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
       - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      - R2_ENDPOINT_URL=${R2_ENDPOINT_URL}
       - FLAME_MODEL_PATH=/app/assets/flame/generic_model.pkl
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - COOKIE_SECURE=${COOKIE_SECURE}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE}
+      - CORS_ORIGINS=${CORS_ORIGINS}
     volumes:
       - ./backend/assets:/app/assets
 
@@ -136,15 +135,19 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     volumes:
       - ./backend/assets:/app/assets
 ```
 
-Requiere un `.env` en la raíz con las variables de prod reales. **Nunca commitear ese `.env`.**
+Requiere un `.env` en la raíz con los valores reales. **Nunca commitear ese `.env`.**
 
 ---
 
-## .dockerignore
+## `.dockerignore`
+
+Ambos están en el repo y **deben mantenerse** — evitan que `.env*` y otros
+archivos sensibles entren en las imágenes.
 
 ```
 # backend/.dockerignore
@@ -153,7 +156,7 @@ __pycache__/
 .env*
 .git
 .pytest_cache
-assets/flame/          # el .pkl no va en la imagen, se monta o descarga en startup
+assets/flame/          # el .pkl no va en la imagen
 ```
 
 ```

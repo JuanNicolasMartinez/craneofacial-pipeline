@@ -7,11 +7,11 @@
 | Worker | — (síncrono en router) |
 | Herramienta | FastAPI `UploadFile` |
 | Entrada | archivo .ply / .obj / .stl |
-| Salida | malla raw en R2, row en `meshes` |
+| Salida | malla raw en el almacenamiento de objetos, row en `meshes` |
 
 ## Qué hace
 
-Recibe el archivo del cráneo, lo valida y lo persiste en Cloudflare R2.
+Recibe el archivo del cráneo, lo valida y lo persiste en el almacenamiento de objetos.
 
 ## Trigger
 
@@ -22,7 +22,7 @@ POST /cases/{id}/mesh   (multipart/form-data)
 ## Operaciones
 
 1. Valida extensión (`.ply`, `.obj`, `.stl`) y tamaño máximo (50 MB)
-2. Stream directo a R2 — key: `cases/{case_id}/raw{ext}`
+2. Stream directo al almacenamiento de objetos — key: `cases/{case_id}/raw{ext}`
 3. INSERT en `meshes`: `r2_key`, `format`, `status='uploaded'`, `file_size_bytes`
 
 ## Respuesta

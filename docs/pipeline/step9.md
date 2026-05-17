@@ -7,7 +7,7 @@
 | Worker | `export_worker` — `backend/app/workers/export_worker.py` |
 | Herramienta | trimesh |
 | Entrada | malla facial FLAME deformada + diagnósticos geométricos |
-| Salida | un `.ply` final + `params.json` en R2, row en `reconstructions` |
+| Salida | un `.ply` final + `params.json` en el almacenamiento de objetos, row en `reconstructions` |
 
 ## Qué hace
 
@@ -17,7 +17,7 @@ pero la geometría de baja confianza ya no bloquea la exportación: si el TPS
 completo es inestable, se publica una versión acotada o Procrustes-only que
 mantiene forma humana.
 
-## Archivos generados en R2
+## Archivos generados en el almacenamiento de objetos
 
 ```
 results/{job_id}/result_flame.ply  ← malla facial final
@@ -113,4 +113,4 @@ plantilla FLAME inválida, etc.
 ## No hace
 
 - No calcula métricas de validación (P2P, Hausdorff) — requieren cara de referencia, implementación futura
-- No genera previsualizaciones — el frontend carga el `.ply` directamente desde R2
+- No genera previsualizaciones — el frontend carga el `.ply` directamente desde el almacenamiento vía URL firmada

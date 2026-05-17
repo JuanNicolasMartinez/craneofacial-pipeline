@@ -41,14 +41,31 @@ Logout
 ## Token y sesión
 
 - JWT firmado con **HS256** (`python-jose`). Payload: `sub` = `user.id`, `exp` = expiración.
-- El token viaja en una cookie **`HttpOnly` + `SameSite=Lax`**, nunca en `localStorage`.
+- El token viaja en una cookie **`HttpOnly`**, nunca en `localStorage`.
   JavaScript no puede leer la cookie → inmune al robo de token por XSS.
-- `Secure` se activa en producción (`COOKIE_SECURE=true`, solo HTTPS).
 - Configuración en `backend/app/core/config.py`: `JWT_SECRET_KEY`, `JWT_ALGORITHM`,
-  `ACCESS_TOKEN_EXPIRE_MINUTES`, `COOKIE_NAME`, `COOKIE_SECURE`.
+  `ACCESS_TOKEN_EXPIRE_MINUTES`, `COOKIE_NAME`, `COOKIE_SECURE`, `COOKIE_SAMESITE`.
 
 `JWT_SECRET_KEY` es obligatoria — debe definirse en `backend/.env.local` (dev) y como
-variable de entorno en producción.
+variable de entorno en producción. Generar un valor fuerte con `openssl rand -hex 32`.
+
+### Política de cookie por entorno
+
+| Escenario | `COOKIE_SAMESITE` | `COOKIE_SECURE` | Por qué |
+|---|---|---|---|
+| Mismo dominio / desarrollo | `lax` | `false` en dev, `true` en prod | Frontend y API comparten origen (o `localhost`). La cookie es *same-site*. |
+| Dominios distintos | `none` | `true` | El frontend (SPA) y la API están en dominios distintos. La cookie es *cross-site*: `SameSite=None` es obligatorio para que viaje en las peticiones XHR, y los navegadores exigen `Secure` (HTTPS) junto a `None`. |
+
+La elección depende de **cómo se sirvan** el frontend y la API, no del proveedor:
+
+- Si ambos se publican bajo el mismo dominio (p. ej. la API tras `/api` con un
+  reverse proxy delante del frontend), la cookie es same-site → `lax`.
+- Si se publican en dominios distintos, es cross-site → `none` + `secure`.
+
+El backend valida al arrancar que `COOKIE_SAMESITE=none` venga siempre con
+`COOKIE_SECURE=true`. `CORS_ORIGINS` debe listar el dominio exacto del frontend
+— el comodín `*` no es válido con credenciales. Detalle de las variables de
+despliegue en `docs/arquitecture/DEPLOY.md`.
 
 ---
 

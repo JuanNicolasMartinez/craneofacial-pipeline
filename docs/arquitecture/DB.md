@@ -29,17 +29,27 @@ services:
 DATABASE_URL=postgresql+asyncpg://dev:dev@localhost:5432/craneofacial
 ```
 
-### Producción — Supabase
+### Producción
 
-Postgres gestionado. Se usa **solo** como servidor Postgres estándar — sin cliente JS de Supabase, sin su auth, sin realtime. SQLAlchemy conecta directo.
-
-Usar el pooler (puerto 6543) en prod para no agotar conexiones con los workers Celery:
+Postgres estándar — autoalojado o gestionado, indistinto. La aplicación solo
+necesita una `DATABASE_URL` de Postgres alcanzable; SQLAlchemy conecta directo
+con el driver async `asyncpg`. No se usa ninguna característica propietaria
+(ni auth, ni realtime, ni cliente JS de proveedor alguno).
 
 ```
-DATABASE_URL=postgresql+asyncpg://postgres.[ref]:[pwd]@pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql+asyncpg://<usuario>:<password>@<host>:<puerto>/<db>
 ```
 
-Por qué Supabase sobre Railway/Render Postgres: no pausa la DB por inactividad. Railway y Render pausan después de 7 días sin actividad, lo que mata las conexiones de los workers Celery en un semillero con uso intermitente.
+Consideraciones para producción:
+
+- **Connection pooling:** si el proveedor o el despliegue ofrece un pooler
+  (p. ej. PgBouncer), úsalo. El `api` y el `worker` abren conexiones por
+  separado; sin pooler una DB pequeña puede agotar el límite de conexiones.
+- **Disponibilidad:** la DB no debe pausarse por inactividad. Algunos planes
+  gestionados suspenden la instancia tras días sin uso, lo que corta las
+  conexiones de los workers Celery. Verifica este punto al elegir dónde correrla.
+
+Detalle de despliegue en `docs/arquitecture/DEPLOY.md`.
 
 ---
 
@@ -162,7 +172,7 @@ Malla 3D del cráneo asociada al caso.
 |---|---|---|
 | `id` | UUID PK | |
 | `case_id` | UUID FK → cases | |
-| `r2_key` | VARCHAR(500) | path en Cloudflare R2 |
+| `r2_key` | VARCHAR(500) | key del objeto en el almacenamiento S3-compatible |
 | `format` | VARCHAR(10) | `ply` `obj` `stl` |
 | `status` | VARCHAR(20) | `uploaded` `preprocessed` `error` |
 | `vertex_count` | INTEGER | nullable, poblado en paso 2 |
@@ -261,8 +271,8 @@ Resultado final de un job. Puede haber varias por job (una por variante k).
 |---|---|---|
 | `id` | UUID PK | |
 | `job_id` | UUID FK → pipeline_jobs | |
-| `r2_key_mesh` | VARCHAR(500) | path a `resultado.ply` en R2 |
-| `r2_key_params` | VARCHAR(500) | path a `params.json` en R2 |
+| `r2_key_mesh` | VARCHAR(500) | key del objeto `resultado.ply` en el almacenamiento |
+| `r2_key_params` | VARCHAR(500) | key del objeto `params.json` en el almacenamiento |
 | `p2p_error_mm` | FLOAT | nullable, si hay cara de referencia |
 | `hausdorff_mm` | FLOAT | nullable |
 | `created_at` | TIMESTAMPTZ | |
@@ -291,5 +301,5 @@ CREATE INDEX idx_reconstructions_job_id ON reconstructions(job_id);
 - Timestamps siempre con timezone (`TIMESTAMPTZ`)
 - Campos `status` son VARCHAR con valores controlados — no enums de Postgres (más fácil de migrar)
 - JSONB en `job_steps.params` para flexibilidad de parámetros por paso sin schema fijo
-- Archivos binarios (mallas) nunca en la DB — solo la key de R2
+- Archivos binarios (mallas) nunca en la DB — solo la key del objeto en el almacenamiento
 - Migraciones: `alembic revision --autogenerate -m "descripción"` → revisar antes de aplicar

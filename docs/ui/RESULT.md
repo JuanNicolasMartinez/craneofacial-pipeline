@@ -87,7 +87,7 @@ Exportar resultado
 
 Cada item: IconButton `Download`/`FileText` 36px + texto dos líneas (nombre 14px/500 + descripción 12px `--text-muted`).
 
-Al hacer clic: el backend genera la presigned URL de R2 → `window.open(url)` → descarga directa.
+Al hacer clic: el backend genera una URL firmada del almacenamiento de objetos → `window.open(url)` → descarga directa.
 El archivo no pasa por el servidor FastAPI.
 
 Spinner en el botón durante la generación de URL (< 1s esperado).
