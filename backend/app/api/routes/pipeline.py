@@ -1,8 +1,10 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status as http_status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.storage import get_storage
+from app.models.user import User
 from app.schemas.pipeline import (
     PipelineRunRequest,
     PipelineRunResponse,
@@ -25,8 +27,9 @@ async def run_pipeline(
     case_id: uuid.UUID,
     data: PipelineRunRequest,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    case = await case_service.get_case(db, case_id)
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
@@ -48,15 +51,27 @@ async def run_pipeline(
 
 
 @router.get("/{case_id}/pipeline/jobs", response_model=list[PipelineJobRead])
-async def list_jobs(case_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    case = await case_service.get_case(db, case_id)
+async def list_jobs(
+    case_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     return case.pipeline_jobs
 
 
 @router.get("/{case_id}/result", response_model=ResultRead)
-async def get_result(case_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+async def get_result(
+    case_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    case = await case_service.get_case(db, case_id, user.id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case not found")
+
     reconstruction = await pipeline_service.get_case_result(db, case_id)
     if not reconstruction:
         raise HTTPException(status_code=404, detail="No completed result found")

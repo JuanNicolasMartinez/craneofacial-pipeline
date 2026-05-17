@@ -25,6 +25,13 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
 
+    # Auth: JWT signing + cookie-based session.
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24h
+    COOKIE_NAME: str = "access_token"
+    COOKIE_SECURE: bool = False  # True in prod (HTTPS only)
+
     @property
     def r2_endpoint(self) -> str:
         return self.R2_ENDPOINT_URL.format(account=self.R2_ACCOUNT_ID)

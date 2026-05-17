@@ -9,6 +9,7 @@ from alembic import context
 
 from app.core.config import settings
 from app.models.base import Base  # noqa: F401 — side-effect: registers all models
+import app.models.user  # noqa: F401
 import app.models.case  # noqa: F401
 import app.models.mesh  # noqa: F401
 import app.models.landmark  # noqa: F401

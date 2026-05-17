@@ -34,22 +34,34 @@ class CaseHydration:
     last_job_status: str | None
 
 
-async def create_case(db: AsyncSession, data: CaseCreate) -> Case:
-    case = Case(**data.model_dump())
+async def create_case(db: AsyncSession, data: CaseCreate, user_id: uuid.UUID) -> Case:
+    case = Case(**data.model_dump(), user_id=user_id)
     db.add(case)
     await db.commit()
     await db.refresh(case)
     return case
 
 
-async def get_case(db: AsyncSession, case_id: uuid.UUID) -> Case | None:
-    result = await db.execute(select(Case).where(Case.id == case_id))
+async def get_case(
+    db: AsyncSession, case_id: uuid.UUID, user_id: uuid.UUID | None = None
+) -> Case | None:
+    """Fetch a case. When user_id is given, only returns it if owned by that user."""
+    stmt = select(Case).where(Case.id == case_id)
+    if user_id is not None:
+        stmt = stmt.where(Case.user_id == user_id)
+    result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def list_cases(db: AsyncSession, limit: int = 50, offset: int = 0) -> list[Case]:
+async def list_cases(
+    db: AsyncSession, user_id: uuid.UUID, limit: int = 50, offset: int = 0
+) -> list[Case]:
     result = await db.execute(
-        select(Case).order_by(Case.created_at.desc()).limit(limit).offset(offset)
+        select(Case)
+        .where(Case.user_id == user_id)
+        .order_by(Case.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
     return list(result.scalars().all())
 

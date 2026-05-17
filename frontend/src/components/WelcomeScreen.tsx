@@ -5,8 +5,7 @@ import { useCases } from "../api/hooks/useCases";
 import { useJobStore } from "../store/jobStore";
 import { CreateCaseModal } from "../features/cases/CreateCaseModal";
 import type { CaseList, CaseStep } from "../api/types";
-
-type Theme = "dark" | "light" | "purple";
+import type { Theme } from "../hooks/useTheme";
 
 interface WelcomeScreenProps {
   theme: Theme;
@@ -213,7 +212,7 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
                   </span>
 
                   <div style={{ marginTop: "auto", fontSize: 11, color: "var(--text-muted)" }}>
-                    {c.created_by} · {new Date(c.created_at).toLocaleDateString()}
+                    {c.owner_name} · {new Date(c.created_at).toLocaleDateString()}
                   </div>
                 </button>
               ))}
@@ -222,7 +221,7 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
         </div>
 
         <div style={{ marginTop: "auto", fontSize: 11, color: "var(--text-muted)", opacity: 0.6 }}>
-          NeuroMinds · UBPD · v0.1.0
+          {/* NeuroMinds · UBPD · v0.1.0 */}
         </div>
       </div>
 

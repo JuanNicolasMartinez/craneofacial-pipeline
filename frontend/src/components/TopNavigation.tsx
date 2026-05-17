@@ -1,6 +1,6 @@
-import { Skull, Sun, Moon, Sparkles } from "lucide-react";
-
-type Theme = "dark" | "light" | "purple";
+import { Skull } from "lucide-react";
+import { UserMenu } from "./UserMenu";
+import type { Theme } from "../hooks/useTheme";
 
 interface TopNavigationProps {
   theme: Theme;
@@ -8,8 +8,6 @@ interface TopNavigationProps {
 }
 
 export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
-  const themes: Theme[] = ["dark", "light", "purple"];
-
   return (
     <nav
       style={{
@@ -37,11 +35,11 @@ export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
             padding: "2px 8px",
           }}
         >
-          NeuroMinds · UBPD
+          {/* NeuroMinds · UBPD */}
         </span>
       </div>
 
-      <div style={{ display: "flex", gap: "var(--space-2)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
         {import.meta.env.DEV && (
           <button
             className="btn-secondary"
@@ -56,22 +54,7 @@ export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
             FLAME Map
           </button>
         )}
-        {themes.map((t) => (
-          <button
-            key={t}
-            className="btn-icon"
-            onClick={() => onThemeChange(t)}
-            title={`${t} theme`}
-            style={{
-              background: theme === t ? "var(--bg-elevated)" : undefined,
-              color: theme === t ? "var(--accent-blue)" : undefined,
-            }}
-          >
-            {t === "dark"   && <Moon size={16} />}
-            {t === "light"  && <Sun size={16} />}
-            {t === "purple" && <Sparkles size={16} />}
-          </button>
-        ))}
+        <UserMenu theme={theme} onThemeChange={onThemeChange} />
       </div>
     </nav>
   );

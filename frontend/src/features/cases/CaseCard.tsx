@@ -48,7 +48,7 @@ export function CaseCard({ case_, isActive, onClick }: CaseCardProps) {
         </span>
       </div>
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: "var(--space-1)" }}>
-        {case_.created_by} · {new Date(case_.created_at).toLocaleDateString()}
+        {case_.owner_name} · {new Date(case_.created_at).toLocaleDateString()}
       </p>
     </button>
   );

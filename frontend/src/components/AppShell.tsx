@@ -15,8 +15,8 @@ import { RHINE_CAMPBELL_LANDMARKS } from "../features/landmarks/constants";
 import { useJobStore, type CaseStep } from "../store/jobStore";
 import { useCaseHydration } from "../api/hooks/useCases";
 import { useCaseResult } from "../api/hooks/usePipeline";
+import { useTheme } from "../hooks/useTheme";
 
-type Theme = "dark" | "light" | "purple";
 type BoundsPayload = { min: [number, number, number]; max: [number, number, number] };
 
 const RESULT_MESH_ROTATION: [number, number, number] = [Math.PI, 0, 0];
@@ -66,7 +66,7 @@ export function AppShell() {
   const isFlameMappingDev =
     import.meta.env.DEV &&
     new URLSearchParams(window.location.search).get("dev") === "flame-mapping";
-  const [theme, setTheme] = useState<Theme>("dark");
+  const { theme, setTheme } = useTheme();
   const [activeLandmarkIndex, setActiveLandmarkIndex] = useState(0);
   const [resultBounds, setResultBounds] = useState<BoundsPayload | null>(null);
 
@@ -111,11 +111,6 @@ export function AppShell() {
     !!displayMeshUrl &&
     activeStep !== "result" &&
     landmarksInProgress.length > 0;
-
-  const handleThemeChange = (t: Theme) => {
-    setTheme(t);
-    document.documentElement.setAttribute("data-theme", t);
-  };
 
   const handleMeshUploaded = useCallback(() => {
     setActiveStep("landmarks");
@@ -170,11 +165,11 @@ export function AppShell() {
   if (isFlameMappingDev) return <FlameMappingDevTool />;
   const isLandmarkMode = activeStep === "landmarks" && !!activeMeshUrl;
 
-  if (!activeCaseId) return <WelcomeScreen onThemeChange={handleThemeChange} theme={theme} />;
+  if (!activeCaseId) return <WelcomeScreen onThemeChange={setTheme} theme={theme} />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100%", overflow: "hidden", background: "var(--bg-page)" }}>
-      <TopNavigation theme={theme} onThemeChange={handleThemeChange} />
+      <TopNavigation theme={theme} onThemeChange={setTheme} />
 
       <div style={{
         flex: 1, display: "grid",

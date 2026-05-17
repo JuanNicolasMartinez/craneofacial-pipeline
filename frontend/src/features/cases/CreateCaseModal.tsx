@@ -9,7 +9,6 @@ interface CreateCaseModalProps {
 export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
   const [caseRef, setCaseRef] = useState("");
   const [notes, setNotes] = useState("");
-  const [operator, setOperator] = useState("");
   const createCase = useCreateCase();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +16,6 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
     const result = await createCase.mutateAsync({
       case_ref: caseRef,
       notes: notes || undefined,
-      created_by: operator,
     });
     onCreated(result.id, result.case_ref);
   };
@@ -52,7 +50,6 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
 
         {[
           { label: "Referencia del caso", value: caseRef, setter: setCaseRef, placeholder: "CASO-2025-084", required: true },
-          { label: "Operador", value: operator, setter: setOperator, placeholder: "Nombre del analista", required: true },
           { label: "Notas", value: notes, setter: setNotes, placeholder: "Observaciones opcionales", required: false },
         ].map(({ label, value, setter, placeholder, required }) => (
           <label key={label} style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>

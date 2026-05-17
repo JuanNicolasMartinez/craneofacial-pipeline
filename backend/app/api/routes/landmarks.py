@@ -1,7 +1,9 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.models.user import User
 from app.schemas.landmark import LandmarkSetCreate, LandmarkSetRead
 from app.services import landmark_service, case_service
 
@@ -13,8 +15,9 @@ async def save_landmarks(
     case_id: uuid.UUID,
     data: LandmarkSetCreate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    case = await case_service.get_case(db, case_id)
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
@@ -33,8 +36,9 @@ async def save_landmarks(
 async def get_landmarks(
     case_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    case = await case_service.get_case(db, case_id)
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     return await landmark_service.get_latest_landmark_set(db, case_id)

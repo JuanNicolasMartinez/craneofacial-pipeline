@@ -2,10 +2,27 @@
 // Once the backend is up, run: pnpm generate-types
 // and switch imports to src/api/types.generated.ts
 
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  created_at: string;
+}
+
+export interface UserRegister {
+  email: string;
+  full_name: string;
+  password: string;
+}
+
+export interface UserLogin {
+  email: string;
+  password: string;
+}
+
 export interface CaseCreate {
   case_ref: string;
   notes?: string;
-  created_by: string;
 }
 
 export type CaseStep = "mesh" | "landmarks" | "biological_profile" | "pipeline" | "result";
@@ -15,7 +32,7 @@ export interface CaseRead {
   case_ref: string;
   status: string;
   notes: string | null;
-  created_by: string;
+  owner_name: string;
   created_at: string;
   updated_at: string;
   // Hydration / checkpoint
@@ -34,7 +51,7 @@ export interface CaseList {
   id: string;
   case_ref: string;
   status: string;
-  created_by: string;
+  owner_name: string;
   created_at: string;
   current_step: CaseStep;
 }

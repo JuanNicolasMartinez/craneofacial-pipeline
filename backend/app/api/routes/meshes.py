@@ -1,8 +1,10 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.core.storage import get_storage
+from app.models.user import User
 from app.schemas.mesh import MeshRead, BiologicalProfileCreate, BiologicalProfileRead
 from app.services import mesh_service, case_service
 
@@ -17,8 +19,9 @@ async def upload_mesh(
     case_id: uuid.UUID,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    case = await case_service.get_case(db, case_id)
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
 
@@ -47,8 +50,9 @@ async def update_biological_profile(
     case_id: uuid.UUID,
     data: BiologicalProfileCreate,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
-    case = await case_service.get_case(db, case_id)
+    case = await case_service.get_case(db, case_id, user.id)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
     return await mesh_service.upsert_biological_profile(db, case_id, data)
