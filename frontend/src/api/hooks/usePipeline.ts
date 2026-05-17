@@ -1,9 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiClient } from "../client";
 import type { PipelineRunRequest, PipelineRunResponse, ResultRead } from "../types";
 
 export function useRunPipeline(caseId: string) {
-  const queryClient = useQueryClient();
   return useMutation<PipelineRunResponse, Error, PipelineRunRequest>({
     mutationFn: async (payload) => {
       const { data } = await apiClient.post(

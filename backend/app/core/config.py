@@ -1,5 +1,6 @@
 from typing import Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,10 +32,24 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24h
     COOKIE_NAME: str = "access_token"
     COOKIE_SECURE: bool = False  # True in prod (HTTPS only)
+    # "lax" for same-site dev; "none" in prod where the SPA (Vercel) and the
+    # API (Railway) are on different domains — required for the cookie to ride
+    # cross-site XHR. "none" demands COOKIE_SECURE=true.
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
 
     @property
     def r2_endpoint(self) -> str:
         return self.R2_ENDPOINT_URL.format(account=self.R2_ACCOUNT_ID)
+
+    @model_validator(mode="after")
+    def _validate_cookie_policy(self) -> "Settings":
+        # Browsers reject a SameSite=None cookie that is not also Secure.
+        if self.COOKIE_SAMESITE == "none" and not self.COOKIE_SECURE:
+            raise ValueError(
+                "COOKIE_SAMESITE='none' requires COOKIE_SECURE=true "
+                "(cross-site cookies must be sent over HTTPS)."
+            )
+        return self
 
 
 settings = Settings()
