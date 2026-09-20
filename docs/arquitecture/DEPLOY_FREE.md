@@ -83,20 +83,25 @@ servicios externos (ver más abajo).
 
 La opción más holgada en CPU y memoria (2 vCPU / 16 GB) para los pasos 6–9.
 
-1. Crea un Space con SDK **Docker**.
-2. Sube el repo tal cual.
-3. Añade al `README.md` del Space la cabecera de metadatos:
+1. Crea un Space con SDK **Docker**. Si vas a incluir el modelo FLAME, que
+   sea **privado**: su licencia no permite redistribuirlo.
+2. Sube el contenido del repo. El `README.md` del Space necesita esta cabecera
+   de metadatos (solo vive en el Space, no en el repo de GitHub):
 
 ```yaml
 ---
 title: Craneofacial Pipeline
 sdk: docker
 app_port: 8000
+pinned: false
 ---
 ```
 
-4. En **Settings → Variables and secrets** añade `DATA_DIR=/tmp/data` (sin
-   disco de pago, `/data` no es escribible) y `JWT_SECRET_KEY` como *secret*.
+3. En **Settings → Variables and secrets**: `DATA_DIR=/tmp/data` como variable
+   (sin disco de pago, `/data` no es escribible) y `JWT_SECRET_KEY` como
+   *secret*.
+4. Opcional: sube `generic_model.pkl` a `deploy/flame/` del Space para que el
+   paso 9 funcione.
 
 ### Railway / Koyeb / Fly.io
 
@@ -138,10 +143,18 @@ Ninguna es obligatoria. `.env.example` en la raíz las lista todas.
 registro en <https://flame.is.tue.mpg.de>. Sin él, los pasos 1–8 corren y el
 paso 9 falla con un error explícito; el resto de la app funciona.
 
-Para tenerlo en un despliegue sin disco propio, súbelo a cualquier sitio que
-dé una URL de descarga directa (un release de GitHub, un bucket, un dataset
-privado de Hugging Face) y define `FLAME_MODEL_URL`. El entrypoint lo descarga
-en el arranque si aún no está.
+Tres formas de proveerlo, en el orden en que las busca el entrypoint:
+
+1. **Volumen montado** en `FLAME_MODEL_PATH` (por defecto `/data/flame/`). Es
+   lo que hace `docker-compose.demo.yml` con tu copia local.
+2. **Horneado en la imagen**: copia el `.pkl` a `deploy/flame/` antes de
+   construir y viajará dentro. Única vía cuando la plataforma no tiene disco
+   persistente *ni* permite descargarlo (un Space privado, por ejemplo). El
+   `.pkl` está en `.gitignore`: su licencia no permite redistribuirlo, así que
+   nunca en un repositorio público.
+3. **Descarga en el arranque** con `FLAME_MODEL_URL` apuntando a una URL de
+   descarga directa (un release de GitHub, un bucket). El entrypoint lo baja
+   solo si aún no está.
 
 ---
 

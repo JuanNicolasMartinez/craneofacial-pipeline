@@ -16,8 +16,11 @@ mkdir -p "$DATA_DIR"
 # mensajes de progreso), así que no se persiste nada a disco.
 if [[ -z "${REDIS_URL:-}" ]]; then
   log "REDIS_URL sin definir → arrancando redis-server local en 127.0.0.1:6379"
+  # pidfile y dir dentro de DATA_DIR: hay plataformas donde el contenedor no
+  # corre como root y /var/run no es escribible.
   redis-server --daemonize yes --bind 127.0.0.1 --port 6379 \
-    --save '' --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru
+    --save '' --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru \
+    --pidfile "$DATA_DIR/redis.pid" --dir "$DATA_DIR"
   export REDIS_URL="redis://127.0.0.1:6379/0"
 
   for _ in $(seq 1 30); do
@@ -31,6 +34,14 @@ fi
 # Sin él, los pasos 6–8 del pipeline fallan y el resto de la app funciona.
 FLAME_MODEL_PATH="${FLAME_MODEL_PATH:-$DATA_DIR/flame/generic_model.pkl}"
 export FLAME_MODEL_PATH
+
+BAKED_FLAME=/opt/deploy/flame/generic_model.pkl
+if [[ ! -f "$FLAME_MODEL_PATH" && -f "$BAKED_FLAME" ]]; then
+  log "Usando el modelo FLAME incluido en la imagen ($BAKED_FLAME)"
+  FLAME_MODEL_PATH="$BAKED_FLAME"
+  export FLAME_MODEL_PATH
+fi
+
 if [[ -n "${FLAME_MODEL_URL:-}" && ! -f "$FLAME_MODEL_PATH" ]]; then
   log "Descargando modelo FLAME desde FLAME_MODEL_URL..."
   mkdir -p "$(dirname "$FLAME_MODEL_PATH")"

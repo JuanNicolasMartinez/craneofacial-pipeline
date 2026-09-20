@@ -45,6 +45,10 @@ RUN pip install --no-cache-dir --upgrade pip setuptools && \
 
 COPY backend/ .
 COPY --from=frontend /build/dist /app/frontend
+# Si hay un generic_model.pkl en deploy/flame/, viaja dentro de la imagen:
+# es la única vía cuando la plataforma no tiene disco persistente ni permite
+# descargarlo (un Space privado, por ejemplo).
+COPY deploy/ /opt/deploy/
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

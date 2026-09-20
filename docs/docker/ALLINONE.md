@@ -35,8 +35,10 @@ docker run -p 8000:8000 -v craneo_data:/data craneofacial
 1. Crea `DATA_DIR`.
 2. Arranca `redis-server` local **solo si no hay `REDIS_URL`** (sin
    persistencia: la cola y los mensajes de progreso son efímeros por diseño).
-3. Descarga el modelo FLAME si `FLAME_MODEL_URL` está definida y el archivo no
-   existe todavía. Si no hay modelo, avisa y sigue: fallará el paso 9.
+3. Resuelve el modelo FLAME, en este orden: el que haya en
+   `FLAME_MODEL_PATH` (volumen), el horneado en `deploy/flame/` durante el
+   build, o la descarga desde `FLAME_MODEL_URL`. Si no hay ninguno, avisa y
+   sigue: fallará el paso 9.
 4. Aplica `alembic upgrade head` — igual que el `api` en el despliegue por
    piezas; el worker nunca migra.
 5. Lanza el worker Celery (`mesh_queue,compute_queue,export_queue`) y
