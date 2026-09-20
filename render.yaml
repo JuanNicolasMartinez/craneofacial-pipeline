@@ -1,0 +1,36 @@
+# Blueprint de Render — despliegue de un clic en el plan gratuito.
+#
+#   1. Fork/push de este repo a GitHub
+#   2. Render → New → Blueprint → seleccionar el repo
+#
+# El plan free no tiene disco persistente: la base SQLite y los archivos
+# subidos viven mientras viva la instancia. Para datos que sobrevivan,
+# ver DEPLOY_FREE.md (Postgres gestionado + almacenamiento S3).
+services:
+  - type: web
+    name: craneofacial-pipeline
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      # Sin esto, cada reinicio generaría un secreto nuevo y cerraría sesiones.
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # Render sirve siempre por HTTPS y el SPA comparte dominio con la API.
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: DATA_DIR
+        value: /data
+      - key: CELERY_CONCURRENCY
+        value: "1"
+      # Opcionales — descomenta y rellena en el panel de Render:
+      # - key: DATABASE_URL     # Postgres gestionado (Neon, Supabase, Render)
+      #   sync: false
+      # - key: REDIS_URL        # Redis gestionado (Upstash…)
+      #   sync: false
+      # - key: FLAME_MODEL_URL  # URL directa al generic_model.pkl
+      #   sync: false

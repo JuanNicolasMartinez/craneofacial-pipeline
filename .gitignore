@@ -9,6 +9,10 @@ backend/assets/flame/
 # Local file storage (dev mode mesh/result uploads)
 backend/storage/
 
+# Datos del modo autocontenido (SQLite, secreto JWT generado, uploads)
+backend/data/
+data/
+
 # Python
 __pycache__/
 *.py[cod]

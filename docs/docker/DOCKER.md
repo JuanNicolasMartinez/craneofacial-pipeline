@@ -9,6 +9,7 @@ Documentación de contenedores para desarrollo local y producción.
 | `LOCAL.md` | Entorno de desarrollo con `docker compose up` |
 | `SERVICES.md` | Qué hace cada servicio, sus puertos y dependencias |
 | `PROD.md` | Imágenes y configuración para el despliegue en producción |
+| `ALLINONE.md` | Imagen única (api + worker + Redis + SPA) para planes free |
 
 Los requisitos de despliegue, independientes del proveedor, están en
 `docs/arquitecture/DEPLOY.md`.
@@ -18,12 +19,15 @@ Los requisitos de despliegue, independientes del proveedor, están en
 ```
 craneofacial-pipeline/
 ├── docker-compose.yml          ← desarrollo local (todos los servicios)
-├── docker-compose.prod.yml     ← overrides para producción
+├── docker-compose.demo.yml     ← prueba local de la imagen de despliegue
+├── Dockerfile                  ← imagen única: api + worker + Redis + SPA
+├── docker/
+│   └── entrypoint.sh           ← arranque de la imagen única
 ├── backend/
 │   ├── Dockerfile              ← imagen compartida api + worker
 │   └── .dockerignore
 └── frontend/
-    ├── Dockerfile              ← build estático para preview local
+    ├── Dockerfile              ← dev server del SPA en contenedor
     └── .dockerignore
 ```
 

@@ -9,6 +9,11 @@ infraestructura propia (servidores físicos, VPS) que para servicios gestionados
 Lectura previa: `STACK.md` (tecnologías), `DB.md` (datos), `AUTH.md` (sesión),
 `docs/docker/PROD.md` (artefactos Docker).
 
+> Para desplegar todo en **un solo servicio** —planes gratuitos o de prueba,
+> demos— hay un artefacto aparte: el `Dockerfile` de la raíz empaqueta las seis
+> piezas en una imagen. Ver `DEPLOY_FREE.md`. Este documento sigue siendo la
+> referencia del despliegue por piezas separadas.
+
 ---
 
 ## Componentes a desplegar
@@ -109,23 +114,27 @@ desde imágenes/builds del repo; las tres últimas son infraestructura.
 
 | Variable | Obligatoria | Descripción |
 |---|---|---|
-| `DATABASE_URL` | sí | `postgresql+asyncpg://usuario:pwd@host:puerto/db` |
-| `REDIS_URL` | sí | `redis://[:pwd@]host:puerto/0` |
-| `JWT_SECRET_KEY` | sí | Clave de firma JWT. Generar con `openssl rand -hex 32`. Sin ella el proceso no arranca. |
+| `DATABASE_URL` | sí en prod | `postgresql+asyncpg://usuario:pwd@host:puerto/db`. También se acepta el formato que publican los proveedores (`postgres://…`, `?sslmode=require`): el backend lo adapta al driver async. Sin definirla, cae a SQLite en `DATA_DIR` — solo apto para la demo de `DEPLOY_FREE.md`. |
+| `REDIS_URL` | sí en prod | `redis://[:pwd@]host:puerto/0`. Sin definirla, se asume un Redis local en `127.0.0.1:6379`. |
+| `JWT_SECRET_KEY` | sí en prod | Clave de firma JWT. Generar con `openssl rand -hex 32`. Sin definirla se genera una y se persiste en `DATA_DIR`, lo que cierra las sesiones abiertas si el disco es efímero o si hay varias réplicas. |
+| `DATA_DIR` | no | Directorio de datos de los valores por defecto autocontenidos (SQLite, storage local, secreto JWT). Por defecto `/app/data`. |
 | `JWT_ALGORITHM` | no | Por defecto `HS256`. |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | no | Vida del token en minutos. Por defecto `1440` (24 h). |
 | `COOKIE_SECURE` | sí en prod | `true` — la cookie de sesión solo viaja por HTTPS. |
 | `COOKIE_SAMESITE` | sí en prod | `lax` si frontend y API comparten dominio; `none` si están en dominios distintos (exige `COOKIE_SECURE=true`). Ver `AUTH.md`. |
-| `CORS_ORIGINS` | sí | Lista JSON con el/los dominio(s) exactos del frontend, p. ej. `["https://midominio.tld"]`. El comodín `*` no es válido con credenciales. |
-| `PUBLIC_BASE_URL` | sí | URL pública del `api` (se usa para construir URLs de archivos en modo `local`). |
+| `CORS_ORIGINS` | sí, salvo mismo origen | Dominio(s) exactos del frontend, como lista JSON (`["https://midominio.tld"]`) o separados por comas. El comodín `*` no es válido con credenciales. Innecesaria si el `api` sirve el SPA. |
+| `PUBLIC_BASE_URL` | no | URL pública del `api`, usada para construir URLs de archivos en modo `local`. Vacía = URLs relativas (`/files/...`), correcto cuando SPA y API comparten origen. |
 | `STORAGE_BACKEND` | no | `local` (disco) o `r2` (S3-compatible). Por defecto `local`. |
-| `STORAGE_LOCAL_PATH` | no | Ruta en disco si `STORAGE_BACKEND=local`. |
+| `STORAGE_LOCAL_PATH` | no | Ruta en disco si `STORAGE_BACKEND=local`. Por defecto `DATA_DIR/storage`. |
+| `SERVE_FRONTEND` | no | `true` por defecto: si hay un build del SPA en `FRONTEND_DIST_PATH`, el `api` lo sirve con fallback a `index.html`. Si el directorio no existe, el `api` solo sirve API. |
+| `FRONTEND_DIST_PATH` | no | Dónde busca el `api` el `dist/` del SPA. Por defecto `/app/frontend`. |
 | `R2_ENDPOINT_URL` | si `r2` | Endpoint del almacenamiento S3-compatible. |
 | `R2_ACCESS_KEY_ID` | si `r2` | Access key del almacenamiento. |
 | `R2_SECRET_ACCESS_KEY` | si `r2` | Secret key del almacenamiento. |
 | `R2_BUCKET_NAME` | si `r2` | Nombre del bucket. |
 | `R2_ACCOUNT_ID` | si `r2` | Identificador de cuenta, si el endpoint lo requiere. |
 | `FLAME_MODEL_PATH` | sí | Ruta al `.pkl` de FLAME dentro del contenedor. |
+| `FLAME_MODEL_URL` | no | URL de descarga directa del `.pkl`. El entrypoint del contenedor todo-en-uno lo descarga en el arranque si falta. |
 
 > Las variables del almacenamiento conservan el prefijo `R2_` por compatibilidad
 > con el código; aplican a **cualquier** almacenamiento S3-compatible, no solo a
@@ -199,7 +208,19 @@ objetos gestionado.
 - Verificar que el plan del Postgres gestionado **no pause** la instancia por
   inactividad.
 
-En las tres, los requisitos por componente y las variables de entorno son los
+### D. Un solo contenedor (planes free, demos)
+
+`api`, `worker`, Redis y el SPA en una única imagen (`Dockerfile` de la raíz),
+con SQLite y disco local por defecto. Un servicio, un puerto, cero
+configuración obligatoria.
+
+- Cookie: SPA y API comparten origen → `COOKIE_SAMESITE=lax`, sin CORS.
+- Cada pieza interna se sustituye por un servicio gestionado con su variable
+  (`DATABASE_URL`, `REDIS_URL`, `STORAGE_BACKEND=r2`) sin reconstruir la imagen.
+- Datos efímeros salvo disco persistente. Procedimiento y límites completos en
+  `DEPLOY_FREE.md`.
+
+En las cuatro, los requisitos por componente y las variables de entorno son los
 mismos — solo cambia *dónde* corre cada pieza.
 
 ---

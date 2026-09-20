@@ -9,6 +9,7 @@ Antes de tocar cualquier archivo, lee en orden:
 2. `docs/arquitecture/DB.md` — modelo de datos completo
 3. `docs/arquitecture/AUTH.md` — autenticación y propiedad de casos
 4. `docs/arquitecture/DEPLOY.md` — requisitos de despliegue (agnóstico al proveedor)
+   y `DEPLOY_FREE.md` — la imagen única para planes gratuitos
 5. `docs/pipeline/step1.md` — los 9 pasos del pipeline y sus dependencias
 6. `docs/ui/` — especificaciones de UI del módulo en el que vas a trabajar
 7. `docs/docker/` — especificaciones de de los contenedores
@@ -43,11 +44,19 @@ backend/app/core/fstt.py           → tabla FSTT estática, nunca se modifica e
 - `fstt.py` es un diccionario estático cargado en startup — no hay base de datos de FSTT
 - Todo schema de entrada/salida tiene su clase Pydantic en `schemas/` — nunca uses `dict` crudo en routers
 - Migraciones solo con Alembic — nunca `Base.metadata.create_all()` en producción
+- El esquema corre en Postgres y en SQLite (ver `DEPLOY_FREE.md`): en modelos y
+  migraciones usa `app/core/dbcompat.py` (`JSONType`, `UTCDateTime`,
+  `now_default`) en lugar de `JSONB`, `DateTime(timezone=True)` o
+  `sa.text('now()')`. Si una migración necesita alterar una columna, envuélvela
+  en `op.batch_alter_table`
 - Todo endpoint que toca un caso usa `Depends(get_current_user)` y filtra por `user_id` — un caso ajeno responde `404`. Ver `docs/arquitecture/AUTH.md`
 - La contraseña nunca se almacena ni se loguea en claro; el token JWT nunca se expone fuera de la cookie HttpOnly
 
 **Frontend**
 - El estado de auth vive en `store/authStore.ts` (cache del `User`); la sesión real está en la cookie HttpOnly, nunca en `localStorage`
+- Las URLs del backend salen de `api/origin.ts` (`API_URL`, `WS_URL`) — no
+  vuelvas a leer `import.meta.env.VITE_*` ni escribas `localhost:8000` suelto:
+  en el despliegue de contenedor único el backend es el propio origen
 - Las rutas bajo `/app` van envueltas en `ProtectedRoute` — no añadas vistas autenticadas fuera de ese árbol
 
 **Frontend**

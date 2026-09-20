@@ -7,8 +7,7 @@ import {
 } from "../viewer3d/FlameTemplateMesh";
 import { RHINE_CAMPBELL_LANDMARKS } from "./constants";
 import { useFlameMappingDev } from "../../api/hooks/useFlameDev";
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+import { API_URL } from "../../api/origin";
 
 export function FlameMappingDevTool() {
   const mappingQuery = useFlameMappingDev(true);

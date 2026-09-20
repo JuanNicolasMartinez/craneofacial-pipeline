@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useJobStore } from "../../store/jobStore";
 import type { JobProgressMessage } from "../../api/types";
-
-const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:8000";
+import { WS_URL } from "../../api/origin";
 
 export function useJobSocket(jobId: string | null) {
   const applyProgressMessage = useJobStore((s) => s.applyProgressMessage);

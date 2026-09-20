@@ -16,6 +16,10 @@ están en `docs/arquitecture/DEPLOY.md`.
 | Imagen `api` | `backend/Dockerfile` | `uvicorn app.main:app` |
 | Imagen `worker` | `backend/Dockerfile` (la misma) | `celery -A app.workers.celery_app worker` |
 | Build del frontend | `frontend/` (`pnpm build`) | nada — son archivos estáticos en `dist/` |
+| Imagen todo-en-uno | `Dockerfile` (raíz) | `docker/entrypoint.sh`: api + worker + Redis + SPA |
+
+La imagen todo-en-uno es una alternativa para desplegar en un solo servicio
+(planes gratuitos, demos); no sustituye a las anteriores. Ver `ALLINONE.md`.
 
 `api` y `worker` comparten la **misma imagen**; solo cambia el comando de
 arranque. El frontend en producción no es un contenedor: es un directorio

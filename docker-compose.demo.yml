@@ -1,0 +1,26 @@
+# Prueba local de la imagen de despliegue: exactamente el mismo artefacto que
+# se sube a la nube (api + worker + Redis + SPA en un contenedor).
+#
+#   docker compose -f docker-compose.demo.yml up --build   →  http://localhost:8000
+#
+# Para desarrollo con hot-reload sigue usando docker-compose.yml.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      DATA_DIR: /data
+      # Sin DATABASE_URL → SQLite en /data. Sin REDIS_URL → Redis embebido.
+      # Sin JWT_SECRET_KEY → se genera y persiste en /data.
+      CELERY_CONCURRENCY: 1
+    volumes:
+      - demo_data:/data
+      # El .pkl de FLAME, si lo tienes descargado, entra por aquí.
+      - ./backend/assets/flame:/data/flame:ro
+
+volumes:
+  demo_data:

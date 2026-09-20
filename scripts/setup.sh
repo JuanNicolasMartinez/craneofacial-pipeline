@@ -43,14 +43,24 @@ fi
 # ── 3. Crear .env.local si no existen ─────────────────────────────────────────
 if [[ ! -f "backend/.env.local" ]]; then
   info "Creando backend/.env.local con valores de desarrollo..."
-  cat > backend/.env.local <<'ENV'
+  cat > backend/.env.local <<ENV
 DATABASE_URL=postgresql+asyncpg://dev:dev@postgres:5432/craneofacial
 REDIS_URL=redis://redis:6379/0
+
+STORAGE_BACKEND=local
+STORAGE_LOCAL_PATH=/app/storage
+PUBLIC_BASE_URL=http://localhost:8000
+
 R2_ACCOUNT_ID=dev_mock
 R2_ACCESS_KEY_ID=dev_mock
 R2_SECRET_ACCESS_KEY=dev_mock
 R2_BUCKET_NAME=craneofacial-dev
 FLAME_MODEL_PATH=/app/assets/flame/generic_model.pkl
+
+# Auth — clave de firma JWT (solo para desarrollo)
+JWT_SECRET_KEY=$(openssl rand -hex 32 2>/dev/null || echo dev-insecure-secret-change-me-in-prod)
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+COOKIE_SECURE=false
 ENV
   success "backend/.env.local creado"
 else

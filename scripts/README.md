@@ -10,6 +10,12 @@ Utilidades de desarrollo para levantar, gestionar y depurar el stack local.
 ./scripts/stop.sh    # al terminar el día
 ```
 
+Para probar cómo queda desplegada (imagen única, sin hot-reload):
+
+```bash
+./scripts/demo.sh    # → http://localhost:8000
+```
+
 ---
 
 ## Referencia
@@ -125,3 +131,19 @@ Para el stack y **elimina** los volúmenes de datos (DB + Redis). Pide confirmac
 ```
 
 Después de un reset, vuelve a ejecutar `setup.sh` para reinicializar.
+
+
+### `demo.sh`
+
+Construye y levanta la **imagen de despliegue** — la misma que se sube a un
+plan gratuito: `api`, `worker`, Redis y el SPA ya construido en un contenedor,
+con SQLite y almacenamiento en disco. Sirve todo en `http://localhost:8000`.
+
+No es para desarrollo (no hay hot-reload): es para verificar el artefacto
+antes de desplegarlo. Ver `docs/arquitecture/DEPLOY_FREE.md`.
+
+```bash
+./scripts/demo.sh
+docker compose -f docker-compose.demo.yml logs -f   # seguir los logs
+docker compose -f docker-compose.demo.yml down      # parar
+```
