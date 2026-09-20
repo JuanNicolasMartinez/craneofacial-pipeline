@@ -148,6 +148,7 @@ Ninguna es obligatoria. `.env.example` en la raíz las lista todas.
 | `STORAGE_BACKEND` | `local` | `r2` para almacenamiento S3-compatible (ver `DEPLOY.md`). |
 | `PUBLIC_BASE_URL` | vacío | Vacío = URLs de archivos relativas, que es lo correcto aquí. |
 | `FLAME_MODEL_URL` | — | Si está, el entrypoint descarga el `.pkl` en el arranque. |
+| `FLAME_MODEL_AUTH_HEADER` | — | Cabecera de autenticación para esa descarga, si la URL es privada. |
 | `FLAME_MODEL_PATH` | `/data/flame/generic_model.pkl` | Dónde espera el worker el modelo. |
 | `CELERY_CONCURRENCY` | `1` | Procesos del worker. Subirlo solo con memoria de sobra. |
 | `CORS_ORIGINS` | `["http://localhost:5173"]` | Solo si sirves el SPA desde otro dominio. Acepta lista JSON o `a,b`. |
@@ -169,9 +170,17 @@ Tres formas de proveerlo, en el orden en que las busca el entrypoint:
    persistente *ni* permite descargarlo (un Space privado, por ejemplo). El
    `.pkl` está en `.gitignore`: su licencia no permite redistribuirlo, así que
    nunca en un repositorio público.
-3. **Descarga en el arranque** con `FLAME_MODEL_URL` apuntando a una URL de
-   descarga directa (un release de GitHub, un bucket). El entrypoint lo baja
-   solo si aún no está.
+3. **Descarga en el arranque** con `FLAME_MODEL_URL`. Como la URL casi
+   siempre será privada —un dataset privado del Hub, un bucket, un release
+   privado—, `FLAME_MODEL_AUTH_HEADER` añade la cabecera de autenticación:
+
+   ```
+   FLAME_MODEL_URL=https://huggingface.co/datasets/<tu-usuario>/<repo>/resolve/main/generic_model.pkl
+   FLAME_MODEL_AUTH_HEADER=Authorization: Bearer hf_xxx
+   ```
+
+   Es la vía para Render y similares, donde el repo de GitHub no lleva el
+   `.pkl`.
 
 ---
 

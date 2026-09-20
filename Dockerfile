@@ -54,12 +54,13 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Valores por defecto del modo autocontenido. Cada uno se sobrescribe con una
 # variable de entorno: ver `docs/arquitecture/DEPLOY_FREE.md`.
+# FLAME_MODEL_PATH no se fija aquí a propósito: el entrypoint lo deriva de
+# DATA_DIR, que es lo que cambia en plataformas con el disco de solo lectura.
 ENV PORT=8000 \
     DATA_DIR=/data \
     PYTHONUNBUFFERED=1 \
     STORAGE_BACKEND=local \
     FRONTEND_DIST_PATH=/app/frontend \
-    FLAME_MODEL_PATH=/data/flame/generic_model.pkl \
     CELERY_CONCURRENCY=1
 
 EXPOSE 8000

@@ -45,16 +45,23 @@ fi
 if [[ -n "${FLAME_MODEL_URL:-}" && ! -f "$FLAME_MODEL_PATH" ]]; then
   log "Descargando modelo FLAME desde FLAME_MODEL_URL..."
   mkdir -p "$(dirname "$FLAME_MODEL_PATH")"
-  if curl -fsSL "$FLAME_MODEL_URL" -o "$FLAME_MODEL_PATH.part"; then
+  # La licencia de FLAME no permite publicarlo, así que la URL suele ser
+  # privada: FLAME_MODEL_AUTH_HEADER lleva la cabecera de autenticación
+  # (p. ej. "Authorization: Bearer hf_xxx" para un dataset privado del Hub).
+  CURL_AUTH=()
+  if [[ -n "${FLAME_MODEL_AUTH_HEADER:-}" ]]; then
+    CURL_AUTH=(-H "$FLAME_MODEL_AUTH_HEADER")
+  fi
+  if curl -fsSL "${CURL_AUTH[@]}" "$FLAME_MODEL_URL" -o "$FLAME_MODEL_PATH.part"; then
     mv "$FLAME_MODEL_PATH.part" "$FLAME_MODEL_PATH"
     log "Modelo FLAME listo en $FLAME_MODEL_PATH"
   else
     rm -f "$FLAME_MODEL_PATH.part"
-    log "AVISO: la descarga de FLAME falló; los pasos 6–8 fallarán"
+    log "AVISO: la descarga de FLAME falló; la reconstrucción (paso 9) fallará"
   fi
 fi
 if [[ ! -f "$FLAME_MODEL_PATH" ]]; then
-  log "AVISO: no hay modelo FLAME en $FLAME_MODEL_PATH (pasos 6–8 fallarán)"
+  log "AVISO: no hay modelo FLAME en $FLAME_MODEL_PATH (la reconstrucción del paso 9 fallará)"
 fi
 
 # ── Migraciones ───────────────────────────────────────────────────────────────
