@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Check, X } from "lucide-react";
 import { useJobStore } from "../../store/jobStore";
 import { useRunPipeline } from "../../api/hooks/usePipeline";
+import { apiErrorMessage } from "../../api/errors";
 import { useJobSocket } from "./useJobSocket";
 
 const STEP_LABELS: Record<number, string> = {
@@ -41,6 +42,9 @@ export function PipelineControl({
   const [kFactor, setKFactor] = useState(0.0);
   const [elapsed, setElapsed] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+  // Fallo al *lanzar* el job (404, 422…). Los fallos de un paso ya en
+  // marcha llegan por WebSocket y viven en stepProgress.
+  const [launchError, setLaunchError] = useState<string | null>(null);
 
   useJobSocket(activeJobId);
 
@@ -65,20 +69,34 @@ export function PipelineControl({
   const isCompleted = stepProgress[9]?.status === "done";
   const isRunning = !!activeJobId;
   const hasProgress = stepEntries.length > 0;
-  const hasError = !!failedStep;
-  const showTimeline = isRunning || hasProgress;
+  const hasError = !!failedStep || !!launchError;
+  // Un fallo al lanzar no produce pasos: sin esto, el aviso quedaría oculto.
+  const showTimeline = isRunning || hasProgress || !!launchError;
   const canRun = !!landmarkSetId && hasBioProfile && !activeJobId;
 
   const handleRun = async () => {
     if (!landmarkSetId || activeJobId) return;
     resetJobProgress();
-    const result = await runPipeline.mutateAsync({
-      landmark_set_id: landmarkSetId,
-      fstt_k_factor: kFactor,
-    });
-    setActiveJobId(result.job_id);
-    setStartTime(Date.now());
-    setElapsed(0);
+    setLaunchError(null);
+    try {
+      const result = await runPipeline.mutateAsync({
+        landmark_set_id: landmarkSetId,
+        fstt_k_factor: kFactor,
+      });
+      setActiveJobId(result.job_id);
+      setStartTime(Date.now());
+      setElapsed(0);
+    } catch (err) {
+      // El caso puede haber dejado de existir bajo los pies del navegador
+      // (despliegue de demo sin datos persistentes): la API responde 404 y
+      // hay que decirlo, no dejar la promesa sin capturar.
+      setLaunchError(
+        apiErrorMessage(
+          err,
+          "No se pudo iniciar el pipeline. Si el caso ya no aparece en la lista, vuelve a Casos y créalo de nuevo.",
+        ),
+      );
+    }
   };
 
   const formatTime = (seconds: number) =>
@@ -390,10 +408,14 @@ export function PipelineControl({
             >
               <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-red)" }}>
-                  Falló en {STEP_LABELS[failedStep.step]}
+                  {failedStep
+                    ? `Falló en ${STEP_LABELS[failedStep.step]}`
+                    : "No se pudo iniciar el pipeline"}
                 </span>
                 <span style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                  {failedStep.error ?? "El backend detuvo la reconstrucci&#243;n por geometr&#237;a inv&#225;lida."}
+                  {launchError ??
+                    failedStep?.error ??
+                    "El backend detuvo la reconstrucci&#243;n por geometr&#237;a inv&#225;lida."}
                 </span>
               </div>
 

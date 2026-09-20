@@ -34,3 +34,5 @@ services:
       #   sync: false
       # - key: FLAME_MODEL_URL  # URL directa al generic_model.pkl
       #   sync: false
+      # - key: FLAME_MODEL_AUTH_HEADER  # si esa URL es privada
+      #   sync: false
