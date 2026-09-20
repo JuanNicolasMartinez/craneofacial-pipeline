@@ -65,7 +65,7 @@ usando `docker-compose.yml` (hot-reload separado de frontend y backend).
 Todas las plataformas parten del mismo repo y del `Dockerfile` de la raíz.
 Ninguna necesita variables obligatorias para arrancar.
 
-### Render (plan free)
+### Render (plan free) — la opción probada
 
 El repo incluye `render.yaml`, así que el despliegue es un blueprint:
 
@@ -75,13 +75,27 @@ El repo incluye `render.yaml`, así que el despliegue es un blueprint:
 
 El plan free duerme el servicio tras 15 minutos de inactividad (el primer
 acceso después tarda ~1 min) y no tiene disco persistente: cada reinicio parte
-de una base vacía. Su instancia es de 512 MB — suficiente para navegar la app
-y correr mallas pequeñas; con cráneos grandes conviene subir de plan o usar
-servicios externos (ver más abajo).
+de una base vacía.
 
-### Hugging Face Spaces (free permanente)
+Sus 512 MB de RAM dan de sobra para el pipeline completo. Medido sobre la
+imagen, con el contenedor limitado a 512 MB:
 
-La opción más holgada en CPU y memoria (2 vCPU / 16 GB) para los pasos 6–9.
+| Situación | Memoria |
+|---|---|
+| En reposo (api + worker + Redis) | 181 MiB |
+| Reconstrucción de una malla de 41k vértices | 327 MiB de pico |
+| Reconstrucción de una malla de 164k vértices | 401 MiB de pico |
+
+Ambas reconstrucciones terminaron en `completed` sin que el kernel matara el
+proceso. Para mallas notablemente más densas conviene medir antes, o decimar
+el cráneo en el paso 2.
+
+### Hugging Face Spaces (requiere PRO)
+
+Hardware holgado (2 vCPU / 16 GB), pero **ya no sirve como plan gratuito**:
+desde 2026, alojar un Space de tipo Docker en `cpu-basic` exige suscripción
+PRO. La API responde `402 Payment Required` al crear el Space sin ella.
+Comprobado el 2026-09-20. Con PRO, el procedimiento es:
 
 1. Crea un Space con SDK **Docker**. Si vas a incluir el modelo FLAME, que
    sea **privado**: su licencia no permite redistribuirlo.
@@ -92,10 +106,13 @@ La opción más holgada en CPU y memoria (2 vCPU / 16 GB) para los pasos 6–9.
 ---
 title: Craneofacial Pipeline
 sdk: docker
-app_port: 8000
+app_port: 7860
 pinned: false
 ---
 ```
+
+Y añade la variable `PORT=7860` para que el contenedor y el proxy del Space
+coincidan.
 
 3. En **Settings → Variables and secrets**: `DATA_DIR=/tmp/data` como variable
    (sin disco de pago, `/data` no es escribible) y `JWT_SECRET_KEY` como
@@ -168,8 +185,9 @@ enseñar la app a alguien:
 - **Un solo proceso de worker.** Los jobs se encolan y corren de a uno.
 - **SQLite.** Va sobrado para uno o dos usuarios simultáneos; no para un
   equipo trabajando a la vez sobre la misma instancia.
-- **Memoria.** La reconstrucción carga la malla y el modelo FLAME: en
-  instancias de 512 MB, un cráneo grande puede quedarse sin memoria.
+- **Memoria.** La reconstrucción carga la malla y el modelo FLAME. En 512 MB
+  cabe holgadamente hasta ~164k vértices (401 MiB de pico medidos); mallas
+  mucho más densas piden más instancia.
 - **Suspensión por inactividad.** En planes free que duermen el servicio, un
   job en curso se pierde al suspenderse.
 
