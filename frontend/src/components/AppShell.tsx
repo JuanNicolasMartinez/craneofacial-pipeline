@@ -88,7 +88,8 @@ export function AppShell() {
   const resultMeshUrl = resultQuery.data?.mesh_url ?? null;
   const hasResult = !!resultQuery.data?.mesh_url;
   const resultQuality = resultQuery.data?.quality_status ?? "ok";
-  const hasQualityWarning = hasResult && resultQuality !== "ok";
+  // const hasQualityWarning = hasResult && resultQuality !== "ok"
+  const hasQualityWarning = false;
   const resultConfidence =
     typeof resultQuery.data?.confidence_score === "number"
       ? resultQuery.data.confidence_score
