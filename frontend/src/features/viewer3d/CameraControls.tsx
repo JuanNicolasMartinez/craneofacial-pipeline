@@ -70,19 +70,18 @@ interface CameraControlsProps {
  */
 export function CameraControls({ apiRef, gridVisible, onToggleGrid }: CameraControlsProps) {
   return (
+    // Dirección y anclaje dependen del breakpoint: viven en index.css.
     <div
+      className="camera-hud"
       style={{
         position: "absolute",
-        bottom: "var(--space-4)",
-        right: "var(--space-4)",
         display: "flex",
-        flexDirection: "column",
         gap: "var(--space-2)",
         zIndex: 5,
       }}
     >
       {/* View presets */}
-      <Group>
+      <Group variant="views">
         <IconBtn title="Vista frontal (1)" onClick={() => apiRef.current.setView("front")}>
           <Box size={16} />
         </IconBtn>
@@ -107,7 +106,7 @@ export function CameraControls({ apiRef, gridVisible, onToggleGrid }: CameraCont
       <LandmarkSizeControl />
 
       {/* Zoom + reset + grid */}
-      <Group>
+      <Group variant="actions">
         <IconBtn title="Acercar" onClick={() => apiRef.current.zoom(-30)}>
           <ZoomIn size={16} />
         </IconBtn>
@@ -132,10 +131,11 @@ function LandmarkSizeControl() {
 
   return (
     <div
+      className="camera-hud__size"
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
       style={{
-        display: "flex",
+        // `display` lo fija index.css: se oculta en pantallas mínimas.
         alignItems: "center",
         gap: "var(--space-2)",
         padding: "var(--space-1) var(--space-2)",
@@ -144,37 +144,53 @@ function LandmarkSizeControl() {
         borderRadius: "var(--radius-pill)",
         backdropFilter: "blur(8px)",
         transition: "all 180ms",
+        flexShrink: 0,
       }}
       title="Tamaño de landmarks"
     >
-      <Circle size={14} style={{ color: "var(--text-secondary)", flexShrink: 0 }} />
-      {expanded ? (
-        <>
-          <input
-            type="range"
-            min={0.05}
-            max={3}
-            step={0.05}
-            value={value}
-            onChange={(e) => setValue(parseFloat(e.target.value))}
-            style={{ width: 120, accentColor: "var(--accent-blue)" }}
-          />
-          <span style={{ fontSize: 10, color: "var(--text-muted)", minWidth: 28, textAlign: "right" }}>
-            {value.toFixed(value < 0.1 ? 2 : 1)}×
-          </span>
-        </>
-      ) : (
-        <span style={{ fontSize: 10, color: "var(--text-muted)", minWidth: 28, textAlign: "right" }}>
-          {value.toFixed(value < 0.1 ? 2 : 1)}×
-        </span>
+      {/* En táctil no hay hover: el icono actúa de interruptor. */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-label="Ajustar tamaño de landmarks"
+        aria-expanded={expanded}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: "var(--text-secondary)",
+          flexShrink: 0,
+        }}
+      >
+        <Circle size={14} />
+      </button>
+      {expanded && (
+        <input
+          className="camera-hud__size-slider"
+          type="range"
+          min={0.05}
+          max={3}
+          step={0.05}
+          value={value}
+          onChange={(e) => setValue(parseFloat(e.target.value))}
+          style={{ width: 120, accentColor: "var(--accent-blue)" }}
+        />
       )}
+      <span style={{ fontSize: 10, color: "var(--text-muted)", minWidth: 28, textAlign: "right" }}>
+        {value.toFixed(value < 0.1 ? 2 : 1)}×
+      </span>
     </div>
   );
 }
 
-function Group({ children }: { children: React.ReactNode }) {
+function Group({ children, variant }: { children: React.ReactNode; variant?: string }) {
   return (
     <div
+      className={`camera-hud__group${variant ? ` camera-hud__group--${variant}` : ""}`}
       style={{
         display: "flex",
         gap: "var(--space-1)",
@@ -205,9 +221,11 @@ function IconBtn({
     <button
       onClick={onClick}
       title={title}
+      className="camera-hud__btn"
       style={{
         width: 32,
         height: 32,
+        flexShrink: 0,
         borderRadius: "50%",
         border: "none",
         background: active ? "var(--accent-blue)" : "transparent",

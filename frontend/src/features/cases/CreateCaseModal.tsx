@@ -22,6 +22,7 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
 
   return (
     <div
+      className="modal-overlay"
       style={{
         position: "fixed", inset: 0,
         background: "rgba(0,0,0,0.6)",
@@ -33,11 +34,11 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
+        className="modal-card"
         style={{
           background: "var(--bg-card)",
           borderRadius: "var(--radius-lg)",
           padding: "var(--space-8)",
-          width: 400,
           display: "flex",
           flexDirection: "column",
           gap: "var(--space-5)",
@@ -65,14 +66,16 @@ export function CreateCaseModal({ onClose, onCreated }: CreateCaseModalProps) {
                 borderRadius: "var(--radius-md)",
                 padding: "var(--space-3) var(--space-4)",
                 color: "var(--text-primary)",
-                fontSize: 14,
+                fontSize: 16, /* <16px provoca zoom automático en iOS */
                 outline: "none",
+                width: "100%",
+                minWidth: 0,
               }}
             />
           </label>
         ))}
 
-        <div style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
+        <div className="modal-actions" style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
           <button type="button" className="btn-secondary" onClick={onClose}>
             Cancelar
           </button>

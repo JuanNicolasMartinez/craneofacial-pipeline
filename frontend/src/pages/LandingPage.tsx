@@ -18,7 +18,7 @@ export function LandingPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "var(--app-height)",
         width: "100%",
         background: "var(--bg-page)",
         display: "flex",
@@ -52,15 +52,16 @@ export function LandingPage() {
         >
           <Skull size={32} style={{ color: "var(--accent-blue)" }} />
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 600, color: "var(--text-primary)" }}>
+        <h1 className="hero-title" style={{ fontWeight: 600, color: "var(--text-primary)" }}>
           Craneofacial Pipeline
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
+        <p className="hero-subtitle" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
           Reconstrucción facial forense a partir de cráneo 3D, basada en el protocolo
           Rhine &amp; Campbell (1980) y la tabla FSTT T-Table-Global-2023.
         </p>
 
         <div
+          className="hero-actions"
           style={{
             display: "flex",
             gap: "var(--space-3)",

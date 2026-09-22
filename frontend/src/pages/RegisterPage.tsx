@@ -95,7 +95,7 @@ export function RegisterPage() {
 
         <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center" }}>
           ¿Ya tienes cuenta?{" "}
-          <Link to="/login" style={{ color: "var(--accent-blue)" }}>
+          <Link to="/login" className="auth-inline-link">
             Inicia sesión
           </Link>
         </p>

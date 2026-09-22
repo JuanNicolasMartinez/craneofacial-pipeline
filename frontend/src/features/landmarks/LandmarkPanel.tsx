@@ -89,6 +89,7 @@ export function LandmarkPanel({ caseId, activeLandmarkIndex, onSelectIndex, onSa
           return (
             <div
               key={def.label}
+              className="landmark-row"
               onClick={() => !isDone && onSelectIndex(i)}
               style={{
                 display: "flex", alignItems: "center", gap: "var(--space-3)",
@@ -129,11 +130,12 @@ export function LandmarkPanel({ caseId, activeLandmarkIndex, onSelectIndex, onSa
               {/* Remove button */}
               {isDone && (
                 <button
+                  className="landmark-row__remove"
                   onClick={(e) => handleRemove(def.label, e)}
                   style={{
                     background: "none", border: "none", cursor: "pointer",
                     color: "var(--text-muted)", fontSize: 14, padding: "0 var(--space-1)",
-                    lineHeight: 1,
+                    lineHeight: 1, flexShrink: 0,
                   }}
                   title="Eliminar"
                 >
@@ -153,14 +155,14 @@ export function LandmarkPanel({ caseId, activeLandmarkIndex, onSelectIndex, onSa
       }}>
         <button
           className="btn-secondary"
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 0, justifyContent: "center", padding: "0 var(--space-3)" }}
           onClick={() => useJobStore.getState().resetLandmarks()}
         >
           Limpiar
         </button>
         <button
           className="btn-primary"
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 0, justifyContent: "center", padding: "0 var(--space-3)" }}
           disabled={placed < total || saveLandmarks.isPending}
           onClick={handleSave}
           title={placed < total ? `Faltan ${total - placed} landmarks` : undefined}
@@ -170,13 +172,13 @@ export function LandmarkPanel({ caseId, activeLandmarkIndex, onSelectIndex, onSa
       </div>
 
       {showExitWarning && (
-        <div style={{
+        <div className="modal-overlay" style={{
           position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200,
         }}>
-          <div style={{
+          <div className="modal-card" style={{
             background: "var(--bg-card)", borderRadius: "var(--radius-lg)",
-            padding: "var(--space-8)", width: 380, border: "1px solid var(--border-medium)",
+            padding: "var(--space-8)", maxWidth: 380, border: "1px solid var(--border-medium)",
           }}>
             <div style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-5)" }}>
               <AlertTriangle size={20} style={{ color: "var(--accent-orange)", flexShrink: 0 }} />
@@ -189,7 +191,7 @@ export function LandmarkPanel({ caseId, activeLandmarkIndex, onSelectIndex, onSa
                 </p>
               </div>
             </div>
-            <div style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
+            <div className="modal-actions" style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
               <button className="btn-secondary" onClick={() => setShowExitWarning(false)}>
                 Cancelar
               </button>

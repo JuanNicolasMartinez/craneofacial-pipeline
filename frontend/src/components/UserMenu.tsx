@@ -66,6 +66,8 @@ export function UserMenu({ theme, onThemeChange }: UserMenuProps) {
             top: "calc(100% + var(--space-2))",
             right: 0,
             width: 240,
+            // El menú se ancla a la derecha: en pantallas estrechas se saldría.
+            maxWidth: "calc(100vw - var(--space-8))",
             background: "var(--bg-card)",
             border: "1px solid var(--border-medium)",
             borderRadius: "var(--radius-md)",

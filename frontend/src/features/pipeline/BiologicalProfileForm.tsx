@@ -50,7 +50,7 @@ export function BiologicalProfileForm({ caseId, onSaved }: BiologicalProfileForm
 
       {/* Sex */}
       <Field label="Sexo estimado">
-        <div style={{ display: "flex", gap: "var(--space-3)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-3)" }}>
           {SEX_OPTIONS.map((o) => (
             <PillOption key={o.value} label={o.label} active={sex === o.value} onClick={() => setSex(o.value as "M" | "F")} />
           ))}
@@ -80,7 +80,7 @@ export function BiologicalProfileForm({ caseId, onSaved }: BiologicalProfileForm
         <input
           type="range" min={0} max={1} step={0.05} value={confidence}
           onChange={(e) => setConfidence(parseFloat(e.target.value))}
-          style={{ width: "100%", accentColor: "var(--accent-blue)" }}
+          style={{ width: "100%", accentColor: "var(--accent-blue)", height: 24 }}
         />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Baja</span>
@@ -137,6 +137,8 @@ function PillOption({ label, active, onClick }: { label: string; active: boolean
         fontWeight: active ? 500 : 400,
         cursor: "pointer",
         transition: "all 120ms",
+        minHeight: 36,
+        whiteSpace: "nowrap",
       }}
     >
       {label}

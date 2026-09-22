@@ -10,20 +10,33 @@ interface TopNavigationProps {
 export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
   return (
     <nav
+      className="top-nav"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: "var(--space-3)",
         padding: "var(--space-3) var(--space-6)",
         background: "var(--bg-card)",
         borderRadius: "var(--radius-pill)",
         border: "1px solid var(--border-subtle)",
         margin: "var(--space-4)",
+        flexShrink: 0,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-        <Skull size={20} style={{ color: "var(--accent-blue)" }} />
-        <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", minWidth: 0 }}>
+        <Skull size={20} style={{ color: "var(--accent-blue)", flexShrink: 0 }} />
+        <span
+          className="top-nav__brand-text"
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           Craneofacial Pipeline
         </span>
         <span
@@ -39,7 +52,7 @@ export function TopNavigation({ theme, onThemeChange }: TopNavigationProps) {
         </span>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexShrink: 0 }}>
         {import.meta.env.DEV && (
           <button
             className="btn-secondary"

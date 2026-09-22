@@ -199,7 +199,7 @@ export function PipelineControl({
               step={0.5}
               value={kFactor}
               onChange={(event) => setKFactor(parseFloat(event.target.value))}
-              style={{ width: "100%", accentColor: "var(--accent-blue)" }}
+              style={{ width: "100%", accentColor: "var(--accent-blue)", height: 24 }}
             />
             <div style={{ display: "flex", justifyContent: "center" }}>
               <span
@@ -208,8 +208,10 @@ export function PipelineControl({
                   fontWeight: 500,
                   color: "var(--text-primary)",
                   background: "var(--bg-elevated)",
-                  borderRadius: "var(--radius-pill)",
+                  borderRadius: "var(--radius-lg)",
                   padding: "2px 12px",
+                  textAlign: "center",
+                  lineHeight: 1.5,
                 }}
               >
                 {kFactor > 0 ? `+${kFactor}` : kFactor} —{" "}
@@ -279,7 +281,7 @@ export function PipelineControl({
                 {progressTitle}
               </h3>
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
-                {isRunning ? formatTime(elapsed) : hasError ? "El job se detuvo antes de exportar el resultado." : "La ejecuci&#243;n termin&#243; correctamente."}
+                {isRunning ? formatTime(elapsed) : hasError ? "El job se detuvo antes de exportar el resultado." : "La ejecución terminó correctamente."}
               </p>
             </div>
           </div>
@@ -311,7 +313,7 @@ export function PipelineControl({
                       display: "flex",
                       alignItems: "center",
                       gap: "var(--space-3)",
-                      height: 48,
+                      minHeight: 48,
                       position: "relative",
                       zIndex: 1,
                     }}
@@ -343,7 +345,7 @@ export function PipelineControl({
                       {isStepError && <X size={12} color="white" strokeWidth={3} />}
                     </div>
 
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <span
                         style={{
                           fontSize: 13,
@@ -382,6 +384,7 @@ export function PipelineControl({
                         color: "var(--text-muted)",
                         minWidth: 40,
                         textAlign: "right",
+                        flexShrink: 0,
                       }}
                     >
                       {isDone && progress?.duration_ms ? `${(progress.duration_ms / 1000).toFixed(1)}s` : ""}
@@ -415,7 +418,7 @@ export function PipelineControl({
                 <span style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
                   {launchError ??
                     failedStep?.error ??
-                    "El backend detuvo la reconstrucci&#243;n por geometr&#237;a inv&#225;lida."}
+                    "El backend detuvo la reconstrucción por geometría inválida."}
                 </span>
               </div>
 

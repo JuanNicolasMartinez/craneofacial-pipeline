@@ -82,6 +82,7 @@
   --radius-xl:   36px;
   --radius-lg:   28px;
   --radius-md:   22px;
+  --radius-sm:   12px;
   --radius-pill: 999px;
 
   --space-1:  4px;
@@ -92,6 +93,26 @@
   --space-6:  24px;
   --space-8:  32px;
   --space-10: 40px;
+
+  /* Alto real de la ventana: en móvil 100vh ignora la barra del navegador. */
+  --app-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root { --app-height: 100dvh; }
+}
+
+/* Los radios grandes se ven desproporcionados en pantallas estrechas. */
+@media (max-width: 640px) {
+  :root {
+    --radius-xl: 24px;
+    --radius-lg: 20px;
+    --radius-md: 16px;
+
+    --space-6:  20px;
+    --space-8:  24px;
+    --space-10: 28px;
+  }
 }
 
 /* ── Base reset ──────────────────────────────────────── */
@@ -163,3 +184,279 @@ html, body, #root {
 }
 
 .btn-icon:hover { background-color: var(--bg-elevated); color: var(--text-primary); }
+
+/* ── Responsive: reglas que los estilos inline no pueden expresar ──
+   La UI se compone con style={{}} en casi todos los componentes, así que
+   todo lo que dependa de un breakpoint vive aquí y se engancha por clase. */
+
+/* Contenedor raíz de una vista a pantalla completa. */
+.app-viewport {
+  height: var(--app-height);
+  min-height: var(--app-height);
+}
+
+/* ── Barra superior ─────────────────────────────────── */
+/* Con poco ancho la píldora deja de serlo y el contenido puede envolverse. */
+@media (max-width: 640px) {
+  .top-nav {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    margin: var(--space-3);
+  }
+  .top-nav__brand-text {
+    font-size: 14px;
+  }
+}
+
+/* En pantallas muy estrechas el nombre largo desplaza al menú de usuario. */
+@media (max-width: 380px) {
+  .top-nav__brand-text {
+    display: none;
+  }
+}
+
+/* ── Cuerpo de la app: visor + panel lateral ────────── */
+.app-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Tablet: el panel se estrecha antes de pasar a una columna. */
+@media (max-width: 1024px) {
+  .app-body {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--space-3);
+  }
+}
+
+/* Móvil / tablet vertical: una sola columna con scroll vertical.
+   El visor deja de estirarse y toma una altura fija para que el panel
+   de abajo siga siendo alcanzable.
+
+   La condición incluye `min-height`: en un móvil apaisado sobra ancho y
+   falta alto, así que ahí conviene mantener las dos columnas en vez de
+   apilar y dejar el visor en una franja inservible. */
+@media (max-width: 860px) and (min-height: 480px) {
+  .app-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: min-content;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 var(--space-3) var(--space-3);
+    gap: var(--space-3);
+  }
+  .app-body__viewer {
+    height: 52vh;
+    min-height: 280px;
+  }
+  .app-body__panel {
+    overflow: visible;
+    min-height: 0;
+  }
+  /* Los paneles fijan height:100% pensando en la columna alta del desktop. */
+  .app-body__panel > * {
+    height: auto;
+  }
+}
+
+/* Apaisado y bajo: dos columnas, con el panel lateral estrechado al mínimo
+   útil para que el visor conserve el ancho. */
+@media (max-width: 860px) and (max-height: 479px) {
+  .app-body {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+    gap: var(--space-2);
+    padding: 0 var(--space-2) var(--space-2);
+  }
+  .app-body__panel {
+    overflow-y: auto;
+  }
+}
+
+/* ── Sub-navegación de pasos ────────────────────────── */
+.step-nav {
+  flex-wrap: wrap;
+}
+
+/* Los 5 pasos + "Casos" no caben en una fila estrecha. Envolverlos robaría
+   tres filas de altura al visor, así que se convierten en una tira con
+   scroll horizontal. */
+@media (max-width: 860px) {
+  .step-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: var(--space-1);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .step-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .step-nav > * {
+    flex-shrink: 0;
+  }
+}
+
+/* ── HUD de cámara sobre el visor ───────────────────── */
+/* Por defecto (escritorio): columna anclada abajo a la derecha. */
+.camera-hud {
+  flex-direction: column;
+  align-items: flex-end;
+  bottom: var(--space-4);
+  right: var(--space-4);
+}
+
+.camera-hud__size {
+  display: flex;
+}
+
+/* En escritorio son tres grupos apilados en la esquina. En móvil eso tapa
+   casi todo el visor, así que pasan a una sola tira inferior: los grupos
+   se alinean en horizontal y las vistas predefinidas hacen scroll. */
+@media (max-width: 860px) {
+  .camera-hud {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: var(--space-2);
+  }
+  .camera-hud__group {
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-width: 0;
+  }
+  .camera-hud__group::-webkit-scrollbar {
+    display: none;
+  }
+  /* El grupo de vistas cede espacio antes que el de zoom, pero sin quedar
+     reducido a un solo botón: por debajo de eso el scroll no se entiende. */
+  .camera-hud__group--views {
+    flex-shrink: 1;
+    min-width: 112px;
+  }
+  .camera-hud__group--actions {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  /* El indicador de tamaño ocupa sitio sin aportar en pantallas mínimas. */
+  .camera-hud__size {
+    display: none;
+  }
+  .camera-hud__size-slider {
+    width: 96px;
+  }
+}
+
+/* Con algo más de sitio el control de tamaño vuelve. */
+@media (min-width: 560px) and (max-width: 860px) {
+  .camera-hud__size {
+    display: flex;
+  }
+}
+
+/* Móvil en horizontal: casi no hay alto, el HUD se reduce. */
+@media (max-height: 430px) and (max-width: 900px) {
+  .camera-hud {
+    transform: scale(0.85);
+    transform-origin: bottom left;
+  }
+}
+
+/* ── Tarjetas modales y de autenticación ────────────── */
+/* Sustituye el width fijo de 400px, que desborda por debajo de ~430px. */
+.modal-card {
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(var(--app-height) - var(--space-8));
+  overflow-y: auto;
+}
+
+.modal-overlay {
+  padding: var(--space-4);
+}
+
+/* Botones del pie de un modal: apilados y a ancho completo en móvil. */
+@media (max-width: 480px) {
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+  .modal-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Rejilla de casos recientes ─────────────────────── */
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+/* Por debajo de 2 columnas, minmax(240px) fuerza desbordamiento horizontal. */
+@media (max-width: 560px) {
+  .case-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tipografía fluida de los encabezados de portada ── */
+.hero-title {
+  font-size: clamp(22px, 6vw, 28px);
+}
+
+.hero-subtitle {
+  font-size: clamp(13px, 3.4vw, 14px);
+}
+
+/* Los dos botones de la portada se apilan si no caben. */
+@media (max-width: 420px) {
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Objetivos táctiles ─────────────────────────────── */
+/* En dispositivos sin puntero fino, la lista de landmarks necesita más alto. */
+@media (pointer: coarse) {
+  .landmark-row {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+  .landmark-row__remove {
+    min-width: 32px;
+    min-height: 32px;
+  }
+}
+
+/* ── Accesibilidad ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Los enlaces dentro de una frase ("¿No tienes cuenta? Regístrate") no pueden
+   ser bloques, pero sí ganar alto táctil sin romper el flujo del texto. */
+.auth-inline-link {
+  display: inline-block;
+  padding: var(--space-2) var(--space-1);
+  color: var(--accent-blue);
+}

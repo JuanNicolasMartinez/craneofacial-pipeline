@@ -101,8 +101,61 @@ El modo por defecto es `dark`. El selector del modo vive en `AppShell`.
 --radius-xl:   36px;   /* AppShell, contenedor principal */
 --radius-lg:   28px;   /* tarjetas grandes, viewer 3D */
 --radius-md:   22px;   /* tarjetas medianas, panels */
+--radius-sm:   12px;   /* métricas, items de menú, chips pequeños */
 --radius-pill: 999px;  /* botones, nav items, badges */
 ```
+
+Por debajo de 640px, `xl`, `lg` y `md` se reducen a 24/20/16px (ver Responsive).
+
+---
+
+## Responsive
+
+La UI se compone casi toda con `style={{}}` inline, que no admite media
+queries. Por eso **todo lo que dependa del tamaño de pantalla vive en
+`index.css`** y se engancha a los componentes por clase. Si una propiedad
+cambia con el breakpoint, no la pongas inline: el estilo inline gana siempre
+a la hoja de estilos y la regla responsive quedaría muerta.
+
+### Breakpoints
+
+| Ancho | Layout |
+|---|---|
+| > 1024px | Visor + panel lateral de 340px |
+| 861–1024px | Igual, panel reducido a 300px |
+| ≤ 860px y alto ≥ 480px | Una columna: visor (52vh, mín. 280px) y panel debajo |
+| ≤ 860px y alto < 480px | Móvil apaisado: vuelve a dos columnas (panel 200–260px) |
+| ≤ 640px | Radios y espaciados reducidos; la barra superior envuelve |
+| ≤ 380px | Se oculta el texto de marca de la barra superior |
+
+En apaisado sobra ancho y falta alto: apilar dejaría el visor en una franja
+inservible, así que ahí se conservan las dos columnas.
+
+### Clases disponibles
+
+| Clase | Para qué |
+|---|---|
+| `.app-viewport` | Raíz a pantalla completa (usa `--app-height`) |
+| `.app-body` / `.app-body__viewer` / `.app-body__panel` | Rejilla visor + panel |
+| `.top-nav` / `.top-nav__brand-text` | Barra superior |
+| `.step-nav` | Pasos: envuelven en escritorio, scroll horizontal en móvil |
+| `.camera-hud` + `__group` / `__btn` / `__size` | HUD del visor 3D |
+| `.modal-overlay` / `.modal-card` / `.modal-actions` | Modales y tarjetas auth |
+| `.case-grid` | Rejilla de casos (una columna por debajo de 560px) |
+| `.hero-title` / `.hero-subtitle` / `.hero-actions` | Portadas |
+| `.landmark-row` / `.landmark-row__remove` | Filas táctiles de landmarks |
+
+### Reglas
+
+- **Alto de ventana:** usa `var(--app-height)`, nunca `100vh`. En móvil `100vh`
+  no descuenta la barra del navegador; el token resuelve a `100dvh` donde existe.
+- **Anchos fijos:** nada de `width: 400`. Usa `width: "100%"` + `maxWidth`, o
+  la clase `.modal-card`.
+- **Inputs:** `fontSize` mínimo 16px; por debajo, iOS hace zoom al enfocar.
+- **Objetivos táctiles:** mínimo 32×32px, 44px preferido para acciones primarias.
+- **Texto variable** (referencia de caso, nombre de archivo, correo): siempre con
+  `minWidth: 0` + `textOverflow: "ellipsis"`, o rompe la rejilla que lo contiene.
+- **Movimiento:** se respeta `prefers-reduced-motion`.
 
 ---
 

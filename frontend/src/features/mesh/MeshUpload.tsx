@@ -80,8 +80,9 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
           alignItems: "center",
           justifyContent: "center",
           gap: "var(--space-4)",
-          padding: "var(--space-10)",
+          padding: "clamp(var(--space-5), 8vw, var(--space-10)) var(--space-4)",
           borderRadius: "var(--radius-lg)",
+          minWidth: 0,
           border: `2px dashed ${dragging ? "var(--accent-blue)" : "var(--border-medium)"}`,
           background: dragging ? "rgba(183,214,223,0.05)" : "var(--bg-surface)",
           cursor: uploading ? "wait" : "pointer",
@@ -99,14 +100,29 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
         {uploading ? (
           <>
             <div style={spinnerStyle} />
-            <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>
+            <span style={{
+              fontSize: 14,
+              color: "var(--text-secondary)",
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
               Subiendo {fileName}…
             </span>
           </>
         ) : fileName && upload.isSuccess ? (
           <>
             <FileCheck size={40} style={{ color: "var(--accent-green)" }} />
-            <span style={{ fontSize: 14, color: "var(--accent-green)", fontWeight: 500 }}>
+            <span style={{
+              fontSize: 14,
+              color: "var(--accent-green)",
+              fontWeight: 500,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
               {fileName} subido correctamente
             </span>
           </>
@@ -127,14 +143,14 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
 
       {error && (
         <div style={{
-          display: "flex", alignItems: "center", gap: "var(--space-2)",
+          display: "flex", alignItems: "flex-start", gap: "var(--space-2)",
           padding: "var(--space-3) var(--space-4)",
           background: "rgba(239,89,78,0.1)",
           borderRadius: "var(--radius-md)",
           border: "1px solid rgba(239,89,78,0.3)",
         }}>
           <AlertCircle size={16} style={{ color: "var(--accent-red)", flexShrink: 0 }} />
-          <span style={{ fontSize: 13, color: "var(--accent-red)" }}>{error}</span>
+          <span style={{ fontSize: 13, color: "var(--accent-red)", minWidth: 0 }}>{error}</span>
         </div>
       )}
     </div>
