@@ -2,9 +2,33 @@ import { useCallback, useState } from "react";
 import { Upload, FileCheck, AlertCircle } from "lucide-react";
 import { useUploadMesh } from "../../api/hooks/useMesh";
 import { useJobStore } from "../../store/jobStore";
+import { apiErrorMessage } from "../../api/errors";
 
 const ACCEPTED = [".ply", ".obj", ".stl"];
 const MAX_MB = 50;
+
+/**
+ * Filtro del selector de archivos.
+ *
+ * Los móviles no resuelven extensiones sueltas en `accept`. iOS solo entiende
+ * MIME types y UTIs, y Android filtra por MIME: una extensión que no saben
+ * mapear se trata como no permitida y el archivo sale atenuado. Ni `.ply` ni
+ * `.stl` tienen MIME registrado que reconozcan, así que los bloqueaban; `.obj`
+ * pasaba porque iOS sí lo mapea a `model/obj`.
+ *
+ * Se añaden los MIME types junto a las extensiones para las plataformas que
+ * los entienden. Como ninguno cubre .ply ni .stl en todas, va un comodín
+ * final: el filtro deja de estorbar y la validación de verdad la hace
+ * `handleFile`, que comprueba la extensión de todos modos en cualquier
+ * dispositivo.
+ */
+const ACCEPT_ATTR = [
+  ...ACCEPTED,
+  "model/stl",
+  "model/obj",
+  "application/octet-stream",
+  "*/*",
+].join(",");
 
 interface MeshUploadProps {
   caseId: string;
@@ -23,21 +47,40 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
       setError(null);
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
       if (!ACCEPTED.includes(`.${ext}`)) {
-        setError(`Formato no soportado. Usa: ${ACCEPTED.join(", ")}`);
+        setError(
+          `"${file.name}" no es una malla válida. Usa un archivo ${ACCEPTED.join(", ")}.`,
+        );
         return;
       }
       if (file.size > MAX_MB * 1024 * 1024) {
         setError(`El archivo supera el límite de ${MAX_MB} MB`);
         return;
       }
+      // Un archivo que todavía vive en la nube (iCloud, OneDrive, Drive) y no
+      // se ha descargado llega con tamaño 0: subirlo daría un caso vacío sin
+      // explicar por qué. Pasa en móvil y en escritorio por igual.
+      if (file.size === 0) {
+        setError(
+          "El archivo está vacío. Si está en la nube (iCloud, OneDrive, Drive), " +
+            "ábrelo primero para descargarlo al dispositivo e inténtalo de nuevo.",
+        );
+        return;
+      }
       setFileName(file.name);
-      const result = await upload.mutateAsync(file);
-      // Backend persists the mesh in storage; the GET /cases/{id} re-fetch will
-      // populate activeMeshUrl with a backend URL. For instant preview we still
-      // show a local object URL until the next hydration cycle replaces it.
-      const objectUrl = URL.createObjectURL(file);
-      setActiveMesh(objectUrl, result.format as "ply" | "obj" | "stl");
-      onUploaded();
+      try {
+        const result = await upload.mutateAsync(file);
+        // Backend persists the mesh in storage; the GET /cases/{id} re-fetch will
+        // populate activeMeshUrl with a backend URL. For instant preview we still
+        // show a local object URL until the next hydration cycle replaces it.
+        const objectUrl = URL.createObjectURL(file);
+        setActiveMesh(objectUrl, result.format as "ply" | "obj" | "stl");
+        onUploaded();
+      } catch (err) {
+        // Sin esto la promesa quedaba sin capturar y la interfaz no decía nada:
+        // el usuario elegía el archivo y no pasaba absolutamente nada visible.
+        setFileName(null);
+        setError(apiErrorMessage(err, "No se pudo subir la malla"));
+      }
     },
     [upload, setActiveMesh, onUploaded]
   );
@@ -47,6 +90,12 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
       e.preventDefault();
       setDragging(false);
       const file = e.dataTransfer.files[0];
+      // Al arrastrar una carpeta el navegador entrega una entrada sin tipo ni
+      // tamaño: sin avisar, la subida fallaba con un error opaco del backend.
+      if (file && file.type === "" && file.size === 0) {
+        setError("Eso parece una carpeta. Arrastra el archivo de malla directamente.");
+        return;
+      }
       if (file) handleFile(file);
     },
     [handleFile]
@@ -54,6 +103,11 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Se limpia el value para que volver a elegir el MISMO archivo dispare
+    // `change` otra vez. Sin esto, tras un fallo el reintento con el mismo
+    // archivo no hace nada: el navegador no emite el evento si el valor no
+    // cambia. Afecta a todos los navegadores, no solo a iOS.
+    e.target.value = "";
     if (file) handleFile(file);
   };
 
@@ -91,7 +145,7 @@ export function MeshUpload({ caseId, onUploaded }: MeshUploadProps) {
       >
         <input
           type="file"
-          accept={ACCEPTED.join(",")}
+          accept={ACCEPT_ATTR}
           style={{ display: "none" }}
           onChange={onInputChange}
           disabled={uploading}
