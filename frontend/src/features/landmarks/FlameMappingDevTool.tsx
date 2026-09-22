@@ -107,7 +107,7 @@ export function FlameMappingDevTool() {
             <ArrowLeft size={14} /> Volver
           </button>
           <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
-            Calibraci&#243;n FLAME
+            Calibración FLAME
           </span>
           <span
             style={{
@@ -210,7 +210,7 @@ export function FlameMappingDevTool() {
             Vertex actual: {currentMapping ?? "sin asignar"}
           </span>
           <span style={{ fontSize: 12, color: pickedVertex ? "var(--accent-blue)" : "var(--text-muted)" }}>
-            {pickedVertex ? `Pick actual: ${pickedVertex.index}` : "Haz clic sobre la malla para elegir un v&#233;rtice"}
+            {pickedVertex ? `Pick actual: ${pickedVertex.index}` : "Haz clic sobre la malla para elegir un vértice"}
           </span>
         </div>
 

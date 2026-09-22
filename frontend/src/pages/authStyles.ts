@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 /** Shared styling tokens for the full-screen auth cards (login / register). */
 
 export const authPageStyle: CSSProperties = {
-  minHeight: "100vh",
+  minHeight: "var(--app-height)",
   width: "100%",
   background: "var(--bg-page)",
   display: "flex",
@@ -16,7 +16,8 @@ export const authCardStyle: CSSProperties = {
   background: "var(--bg-card)",
   borderRadius: "var(--radius-lg)",
   padding: "var(--space-8)",
-  width: 400,
+  width: "100%",
+  maxWidth: 400,
   display: "flex",
   flexDirection: "column",
   gap: "var(--space-5)",
@@ -29,8 +30,10 @@ export const authInputStyle: CSSProperties = {
   borderRadius: "var(--radius-md)",
   padding: "var(--space-3) var(--space-4)",
   color: "var(--text-primary)",
-  fontSize: 14,
+  fontSize: 16, /* <16px provoca zoom automático en iOS al enfocar */
   outline: "none",
+  width: "100%",
+  minWidth: 0,
 };
 
 export const authLabelStyle: CSSProperties = {

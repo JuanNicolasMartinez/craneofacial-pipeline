@@ -77,7 +77,7 @@ export function LoginPage() {
 
         <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center" }}>
           ¿No tienes cuenta?{" "}
-          <Link to="/register" style={{ color: "var(--accent-blue)" }}>
+          <Link to="/register" className="auth-inline-link">
             Regístrate
           </Link>
         </p>

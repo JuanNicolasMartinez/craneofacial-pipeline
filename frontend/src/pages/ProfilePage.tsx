@@ -32,7 +32,7 @@ export function ProfilePage() {
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
+        minHeight: "var(--app-height)",
         width: "100%",
         background: "var(--bg-page)",
       }}

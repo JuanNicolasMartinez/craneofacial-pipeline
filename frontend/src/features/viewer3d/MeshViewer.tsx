@@ -52,6 +52,7 @@ export function MeshViewer({ landmarkMode = false, resetViewKey, focusBounds, ch
         overflow: "hidden",
         border: "1px solid var(--border-subtle)",
         cursor: landmarkMode ? "crosshair" : "grab",
+        touchAction: "none",
       }}
     >
       <Canvas
@@ -114,14 +115,19 @@ export function MeshViewer({ landmarkMode = false, resetViewKey, focusBounds, ch
         <div
           style={{
             position: "absolute",
-            top: "var(--space-4)",
-            left: "50%",
-            transform: "translateX(-50%)",
+            top: "var(--space-3)",
+            left: "var(--space-3)",
+            right: "var(--space-3)",
+            margin: "0 auto",
+            width: "fit-content",
+            maxWidth: "calc(100% - var(--space-6))",
             background: "var(--bg-card)",
             border: "1px solid var(--border-medium)",
-            borderRadius: "var(--radius-pill)",
-            padding: "var(--space-2) var(--space-5)",
+            borderRadius: "var(--radius-lg)",
+            padding: "var(--space-2) var(--space-4)",
             fontSize: 12,
+            lineHeight: 1.5,
+            textAlign: "center",
             color: "var(--text-secondary)",
             zIndex: 5,
             backdropFilter: "blur(8px)",

@@ -169,23 +169,17 @@ export function AppShell() {
   if (!activeCaseId) return <WelcomeScreen onThemeChange={setTheme} theme={theme} />;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100%", overflow: "hidden", background: "var(--bg-page)" }}>
+    <div className="app-viewport" style={{ display: "flex", flexDirection: "column", width: "100%", overflow: "hidden", background: "var(--bg-page)" }}>
       <TopNavigation theme={theme} onThemeChange={setTheme} />
 
-      <div style={{
-        flex: 1, display: "grid",
-        gridTemplateColumns: "minmax(0,1fr) 340px",
-        gap: "var(--space-4)",
-        padding: "0 var(--space-4) var(--space-4)",
-        minHeight: 0,
-        overflow: "hidden",
-      }}>
+      <div className="app-body" style={{ flex: 1 }}>
 
         {/* Center — 3D viewer */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)", minHeight: 0 }}>
+        <div className="app-body__viewer" style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)", minHeight: 0 }}>
 
           {/* Step sub-nav */}
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap" }}>
+          {/* flexWrap se resuelve en CSS: envuelve en escritorio, hace scroll en móvil. */}
+          <div className="step-nav" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             <button
               onClick={clearActiveCase}
               className="btn-secondary"
@@ -194,7 +188,15 @@ export function AppShell() {
             >
               <ArrowLeft size={14} /> Casos
             </button>
-            <span style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 var(--space-2)" }}>
+            <span style={{
+              fontSize: 13,
+              color: "var(--text-muted)",
+              margin: "0 var(--space-2)",
+              maxWidth: 160,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
               {activeCaseRef}
             </span>
             {STEPS.map((s) => (
@@ -247,7 +249,7 @@ export function AppShell() {
         </div>
 
         {/* Right panel — context-sensitive */}
-        <div style={{ overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <div className="app-body__panel" style={{ overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
             {activeStep === "mesh" && (
               <div style={{
                 background: "var(--bg-surface)", borderRadius: "var(--radius-lg)",
@@ -371,7 +373,12 @@ export function AppShell() {
                       FLAME se usó como prior humano; FSTT y landmarks se aplicaron como
                       restricciones suaves para evitar deformaciones no anatómicas.
                     </span>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-2)", marginTop: 2 }}>
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+                      gap: "var(--space-2)",
+                      marginTop: 2,
+                    }}>
                       <Metric label="Confianza" value={resultConfidence !== null ? resultConfidence.toFixed(2) : "—"} />
                       <Metric label="Perfil" value={formatFsttProfile(fsttProfile)} />
                       <Metric label="FSTT" value="media" />

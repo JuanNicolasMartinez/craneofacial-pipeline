@@ -39,10 +39,10 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
 
   return (
     <div
+      className="app-viewport"
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
         width: "100%",
         overflow: "hidden",
         background: "var(--bg-page)",
@@ -77,17 +77,23 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
           >
             <Skull size={32} style={{ color: "var(--accent-blue)" }} />
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 600, color: "var(--text-primary)" }}>
+          <h1 className="hero-title" style={{ fontWeight: 600, color: "var(--text-primary)" }}>
             Craneofacial Pipeline
           </h1>
-          <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
+          <p className="hero-subtitle" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
             Reconstrucción facial forense a partir de cráneo 3D, basada en el protocolo
             Rhine &amp; Campbell (1980) y la tabla FSTT T-Table-Global-2023.
           </p>
           <button
             className="btn-primary"
             onClick={() => setShowModal(true)}
-            style={{ marginTop: "var(--space-3)", padding: "0 var(--space-8)", height: 52, fontSize: 15 }}
+            style={{
+              marginTop: "var(--space-3)",
+              padding: "0 var(--space-8)",
+              height: 52,
+              fontSize: 15,
+              maxWidth: "100%",
+            }}
           >
             <Plus size={18} />
             Nuevo caso forense
@@ -108,7 +114,7 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
           </div>
 
           {isLoading && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "var(--space-4)" }}>
+            <div className="case-grid">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
@@ -145,13 +151,7 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
           )}
 
           {!isLoading && cases && cases.length > 0 && (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: "var(--space-4)",
-              }}
-            >
+            <div className="case-grid">
               {cases.slice(0, 12).map((c) => (
                 <button
                   key={c.id}
@@ -179,7 +179,15 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "var(--space-2)" }}>
-                    <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
+                    <span style={{
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}>
                       {c.case_ref}
                     </span>
                     <span
@@ -211,7 +219,14 @@ export function WelcomeScreen({ theme, onThemeChange }: WelcomeScreenProps) {
                     {STEP_LABEL[c.current_step]}
                   </span>
 
-                  <div style={{ marginTop: "auto", fontSize: 11, color: "var(--text-muted)" }}>
+                  <div style={{
+                    marginTop: "auto",
+                    fontSize: 11,
+                    color: "var(--text-muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}>
                     {c.owner_name} · {new Date(c.created_at).toLocaleDateString()}
                   </div>
                 </button>
